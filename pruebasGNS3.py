@@ -10,7 +10,7 @@ def obtener_informacion_proyecto(api, project_id):
 
 def main():
     # Inicializamos la API de GNS3
-    gns3_server = Gns3Connector("https://127.0.0.1:3080")
+    gns3_server = Gns3Connector(url="http://127.0.0.1:3080")
     print(gns3_server.get_version())
 """
     # Creamos un proyecto con el nombre "Mi proyecto"
