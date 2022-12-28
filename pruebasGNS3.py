@@ -19,7 +19,7 @@ def main():
     lab = Project(name="test_lab", connector=gns3_server)
     lab.create()
     printf('Se crea el proyecto test_lab')
-
+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
     # Añadimos un router al proyecto
 """
     router = gns3_api.nodes.create(
