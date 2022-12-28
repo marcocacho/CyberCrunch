@@ -1,2 +1,1 @@
 ﻿# CyberCrunch
-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
