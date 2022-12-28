@@ -12,8 +12,7 @@ def main():
     # Inicializamos la API de GNS3
     gns3_server = Gns3Connector("https://127.0.0.1:3080")
     print(gns3_server.get_version())
- """
->>>>>>> refs/remotes/origin/main
+"""
     # Creamos un proyecto con el nombre "Mi proyecto"
     lab = Project(name="test_lab", connector=gns3_server)
     lab.create()
@@ -27,9 +26,9 @@ def main():
         name='Router1'
     )
     printf('Router añadido con ID {router["node_id"]}')
-
-    # Obtenemos información sobre el proyecto
-    obtener_informacion_proyecto(gns3_api, project['project_id'])
 """
+    # Obtenemos información sobre el proyecto
+#    obtener_informacion_proyecto(gns3_api, project['project_id'])
+
 if __name__ == '__main__':
     main()
