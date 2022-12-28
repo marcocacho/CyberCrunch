@@ -1,4 +1,4 @@
-import gns3fy
+from gns3fy import Gns3Connector, Project
 
 def obtener_informacion_proyecto(api, project_id):
     # Obtenemos el proyecto con el ID especificado
@@ -14,6 +14,7 @@ def main():
  
     # Creamos un proyecto con el nombre "Mi proyecto"
     lab = Project(name="test_lab", connector=gns3_server)
+    lab.create()
     printf('Se crea el proyecto test_lab')
 
     # Añadimos un router al proyecto
