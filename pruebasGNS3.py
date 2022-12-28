@@ -10,13 +10,15 @@ def obtener_informacion_proyecto(api, project_id):
 
 def main():
     # Inicializamos la API de GNS3
-    gns3_server = Gns3Connector("http://127.0.0.1:3080")
- 
+    gns3_server = Gns3Connector("https://127.0.0.1:3080")
+    print(gns3_server.get_version())
+ """
+>>>>>>> refs/remotes/origin/main
     # Creamos un proyecto con el nombre "Mi proyecto"
     lab = Project(name="test_lab", connector=gns3_server)
     lab.create()
     printf('Se crea el proyecto test_lab')
-
+"""
     # Añadimos un router al proyecto
 """
     router = gns3_api.nodes.create(
