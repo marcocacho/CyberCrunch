@@ -10,13 +10,14 @@ def obtener_informacion_proyecto(api, project_id):
 
 def main():
     # Inicializamos la API de GNS3
-    gns3_api = gns3fy.Gns3Api()
-
+    gns3_server = gns3fy.Gns3Connector("http://127.0.0.1:3080")
+ 
     # Creamos un proyecto con el nombre "Mi proyecto"
-    project = gns3_api.projects.create(name="Mi proyecto")
-    printf('Proyecto creado con ID {project["project_id"]}')
+    lab = Project(name="test_lab", connector=gns3_server)
+    printf('Se crea el proyecto test_lab')
 
     # Añadimos un router al proyecto
+"""
     router = gns3_api.nodes.create(
         project_id=project['project_id'],
         node_type='vpcs',
@@ -26,6 +27,6 @@ def main():
 
     # Obtenemos información sobre el proyecto
     obtener_informacion_proyecto(gns3_api, project['project_id'])
-
+"""
 if __name__ == '__main__':
     main()
