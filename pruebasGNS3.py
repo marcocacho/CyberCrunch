@@ -10,18 +10,22 @@ def openProyect(conector, nombre):
         lab.create()
     print(f"Se abre el proyecto {nombre}.")
     return lab
-#Crea un enlace entre dos Switches
-#Es una funcion estatica
-def CreateLinks(lab, server):
-
+#Crea un nodo proporcionado al proyecto abierto
+def AddNode (name, lab, nodo):
+    """"
     # Añadimos un shitch al proyecto
     print("Lista de switches:")
     for template in gns3_server.get_templates():
         #if "switch" in template["name"]:
             print(f"Template: {template['name']} -- ID: {template['template_id']}")
+    """
 
     #crea un nodo con el nombre dado y del tipo proporcionado en el template
-    #lab.create_node(name = 'test-switch2', template = 'Ethernet switch')
+    lab.create_node(name = name, template = nodo)
+
+#Crea un enlace entre dos Switches
+#Es una funcion estatica
+def CreateLinks(lab, server):
 
     nodos = lab.nodes
     #listamos los nodos del proyecto
@@ -43,7 +47,12 @@ def CreateLinks(lab, server):
 
 #recibe la ruta de una maquina virtual y la añade a gns3 para poder crear nodos.
 def AddVitualPC(nombre, ruta, server):
-    server.create_template(name=nombre, template_type="qemu", hda_disk_image=ruta)
+    #Añadir maquina Qemu
+    #server.create_template(name=nombre, template_type="qemu", hda_disk_image=ruta)
+
+    #Añadir maquina Vbox, nombre de la maquina en vbox.
+    server.create_template(name=nombre, template_type="virtualbox", vmname=ruta)
+
 
 def main(lab, server):
     print("Nodos posibles del servidor")
@@ -63,7 +72,11 @@ if __name__ == '__main__':
 
     #localizacion maquinas virtuales por defecto (/var/lib/libvirt/nombreMaquina), permisos de superusuario
     #AddVitualPC("maquina prueba", "/var/lib/libvirt/images/ubuntu20.04.qcow2", gns3_server)
-    AddVitualPC("Permisos777", "/home/marco/ubuntu20.04.qcow2", gns3_server)
+    #añadir maquina qemu.
+    #AddVitualPC("MaquinaQemu", "/home/marco/ubuntu20.04.qcow2", gns3_server)
+    #Añadir maquina virtual box
+    AddVitualPC("MaquinaVbox", "Ubuntu_20.04.4_VB_LinuxVMImages.COM", gns3_server)
+
 
 
 
