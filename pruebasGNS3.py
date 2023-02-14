@@ -1,4 +1,6 @@
 from gns3fy import Gns3Connector, Project, Node, Link
+import virtualbox
+
 
 #funcion para abrir un proyecto, devuelve el proyecto solicitado por nombre
 def openProyect(conector, nombre):
@@ -75,8 +77,7 @@ if __name__ == '__main__':
     #añadir maquina qemu.
     #AddVitualPC("MaquinaQemu", "/home/marco/ubuntu20.04.qcow2", gns3_server)
     #Añadir maquina virtual box
-    AddVitualPC("MaquinaVbox", "Ubuntu_20.04.4_VB_LinuxVMImages.COM", gns3_server)
-
+    #AddVitualPC("MaquinaVbox", "MaquinaFuncional", gns3_server)
 
 
 
