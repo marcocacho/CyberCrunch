@@ -15,7 +15,7 @@ def openProyect(conector, nombre):
 #Crea un nodo proporcionado al proyecto abierto
 def AddNode (name, lab, nodo):
     """"
-    # Añadimos un shitch al proyecto
+    # Añadimos un switch al proyecto
     print("Lista de switches:")
     for template in gns3_server.get_templates():
         #if "switch" in template["name"]:
@@ -46,14 +46,22 @@ def CreateLinks(lab, server):
     #Se crea el enlace entre los nodos
     #link = Link(project_id=lab.project_id, connector=server, nodes=nodes)
     #link.create()
+""""
+Recibe la ruta de una maquina virtual y la añade a gns3 para poder crear nodos.
+ 
+Parametros de entrada(para Vbox):
+    * nombre: nombre de la maquina virtual con el que se almacena en los templates de gns3
+    * ruta: nombre de la maquina vitual almacenada en vbox
+    * server: locacion del servidor gns3
+    * ram: tamaño de la ram para la maquina virtual (por defecto 1024)
+"""
 
-#recibe la ruta de una maquina virtual y la añade a gns3 para poder crear nodos.
-def AddVitualPC(nombre, ruta, server):
+def AddVitualPC(nombre, ruta,  server, ram=1024):
     #Añadir maquina Qemu
     #server.create_template(name=nombre, template_type="qemu", hda_disk_image=ruta)
 
     #Añadir maquina Vbox, nombre de la maquina en vbox.
-    server.create_template(name=nombre, template_type="virtualbox", vmname=ruta)
+    server.create_template(name=nombre, template_type="virtualbox", vmname=ruta, ram=ram)
 
 
 def main(lab, server):
@@ -77,8 +85,6 @@ if __name__ == '__main__':
     #añadir maquina qemu.
     #AddVitualPC("MaquinaQemu", "/home/marco/ubuntu20.04.qcow2", gns3_server)
     #Añadir maquina virtual box
-    #AddVitualPC("MaquinaVbox", "MaquinaFuncional", gns3_server)
-
-
+    #AddVitualPC("XubuntuVbox", "XubuntuVbox", gns3_server, 2048)
 
 
