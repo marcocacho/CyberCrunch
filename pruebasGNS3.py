@@ -23,7 +23,7 @@ def AddNode (name, lab, nodo):
     """
 
     #crea un nodo con el nombre dado y del tipo proporcionado en el template
-    lab.create_node(name = name, template = nodo)
+    lab.create_node(name=name, template=nodo)
 
 #Crea un enlace entre dos Switches
 #Es una funcion estatica
