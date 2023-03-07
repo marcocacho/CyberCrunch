@@ -78,7 +78,8 @@ if __name__ == '__main__':
     # Inicializamos la API de GNS3
     gns3_server = Gns3Connector(url="http://127.0.0.1:3080")
     lab: Project = openProyect(gns3_server, "test_lab")
-    main(lab, gns3_server)
+    #main(lab, gns3_server)
+    CreateLinks(lab, gns3_server)
 
     #localizacion maquinas virtuales por defecto (/var/lib/libvirt/nombreMaquina), permisos de superusuario
     #AddVitualPC("maquina prueba", "/var/lib/libvirt/images/ubuntu20.04.qcow2", gns3_server)
@@ -86,5 +87,3 @@ if __name__ == '__main__':
     #AddVitualPC("MaquinaQemu", "/home/marco/ubuntu20.04.qcow2", gns3_server)
     #Añadir maquina virtual box
     #AddVitualPC("XubuntuVbox", "XubuntuVbox", gns3_server, 2048)
-
-
