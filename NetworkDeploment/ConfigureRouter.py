@@ -1,8 +1,22 @@
 from netmiko import ConnectHandler, BaseConnection
 
 """
+Este libreria de funciones consiste en la configuracion de routers a traves de telnet.
 
+Actualmente se ha provado en routers cisco, generando la automatizacion funcional para este tipo de dispositivos.
 """
+"""
+Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
+
+Parametros de entrada:
+    + router: tipo de router (validado para routers cisco)
+    + port: puerto que esta abierto para realizar la conexion
+
+Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro host, si se quiere conectar al router 
+directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir 
+claves que no son necesarios para este modo.
+"""
+
 
 def connectRouter(router, port):
     device: BaseConnection = ConnectHandler(
@@ -12,8 +26,9 @@ def connectRouter(router, port):
     )
     return device
 
+
 """
-Configurar ips de un router a traves de telnet
+Configura ip's de un router a traves de telnet
 
 Parametros de entrada:
     + settings: diccionario con los datos de configuracion del router
@@ -119,8 +134,10 @@ def confAcl(settings):
     config_acl = []
     for acl in settings['acls']:
         sentence = "access-list %s %s " % (acl['list'], acl['action'])  # añado la lista y la accion de la sentencia
-        if 'socketTipe' in acl:  # Contiene un tipo de socket
-            sentence += acl['socketTipe'] + ' source '
+        """ 07/03/2023 no funciona en los routers testeados
+        if 'socketTipe' in acl:  # Contiene un tipo de socket 
+            sentence += acl['socketTipe'] + ' source ' 
+        """
         if 'orNetmask' in acl:  # contiene mascara para el origen
             sentence += acl['origin'] + ' ' + acl['orNetmask'] + ' '
         else:
@@ -138,7 +155,7 @@ def confAcl(settings):
                     sentence += 'host ' + acl['dest'] + ' '
         if 'protocol' in acl:  # añade un protocolo o puerto para la sentencia
             if 'comparation' in acl:
-                sentence += acl['comparation']+ ' ' + acl['protocol']
+                sentence += acl['comparation'] + ' ' + acl['protocol']
             sentence += 'eq ' + acl['protocol']
         config_acl.append(sentence)
     output = device.send_config_set(config_acl)
@@ -176,10 +193,11 @@ if __name__ == '__main__':
     routes_static = [{'origin': '10.0.0.0',
                       'orNetmask': '255.255.255.0',
                       'dest': '10.0.1.2'
-                      }, {'origin': '10.0.1.0',
-                          'orNetmask': '255.255.255.0',
-                          'dest': '10.0.2.2'
-                          },
+                      },
+                     {'origin': '10.0.1.0',
+                      'orNetmask': '255.255.255.0',
+                      'dest': '10.0.2.2'
+                      }
                      ]
     routes_rip = {'version': '2',
                   'networks': ['10.0.0.0', '10.0.1.0', '10.0.2.0']
