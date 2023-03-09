@@ -11,7 +11,8 @@ Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maq
 Parametros de entrada:
     + router: tipo de router (validado para routers cisco)
     + port: puerto que esta abierto para realizar la conexion
-
+devuelve:
+    + device: conector al router
 Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro host, si se quiere conectar al router 
 directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir 
 claves que no son necesarios para este modo.
@@ -40,11 +41,9 @@ Parametros de entrada:
                     * iface: interfaz del router (formatos validos fa 0/0 y fast ethernet 0/0)
                     * ip: ip de la interfaz router
                     * netmask: mascara de la ip
-                    * nat: nateo de la interfaz (inside o outside) (no necesario)
+                    * nat(optional): nateo de la interfaz (inside o outside) (no necesario)
 
 """
-
-
 def confIp(settings):
     device = connectRouter(settings['router'], settings['port'])
     for interface in settings['interfaces']:
@@ -67,7 +66,7 @@ Parametros de entrada:
         claves:
             - router: tipo de router que se va configurar
             - port: puerto donde se va a relaziar la conexion telnet
-            - tipe: tipo de enrutamiento (static, rip)
+            - type: tipo de enrutamiento (static, rip)
             - routes: lista de rutas
                 claves de las rutas static:
                     * origin: ip de origen
@@ -83,10 +82,10 @@ def confRoute(settings):
     device = connectRouter(settings['router'], settings['port'])
 
     config_route = []
-    if settings['tipe'] == 'static':  # si el tipo de enrutamiento es estatico.
+    if settings['type'] == 'static':  # si el tipo de enrutamiento es estatico.
         for route in settings['routes']:
             config_route.append('ip route %s %s %s' % (route['origin'], route['orNetmask'], route['dest']))
-    elif settings['tipe'] == 'rip':  # para el tipo de enrutamiento dinamico
+    elif settings['type'] == 'rip':  # para el tipo de enrutamiento dinamico
         version = settings['routes']['version']
         networks = settings['routes']['networks']
         config_route.append('router rip')
@@ -111,11 +110,11 @@ Parametros de entrada:
                     * orNetmask(optional): mascara de red de la ip de origen
                     * dest(optional): ip de destino
                     * destNetmask(optional): ascara de red de la ip de destino
-                    * socketTipe(optional): tipo de socket ( ip | tcp | udp | icmp)
+                    * sockettype(optional): tipo de socket ( ip | tcp | udp | icmp)
                     * comparation(optinal): comparacion que se va a aplicar al protocolo o puerto, en caso de haber
                         puerto y protocolo y no se le aplica se presupone que va a ser 
                     * protocol(optional): protocolo o puerto sobre el que se aplica la acl
-            - interfaces: interfaz del router donde se van a aplicar las eq por defecto (gt | lt | eq)**
+            - interfaces_acl: interfaz del router donde se van a aplicar las eq por defecto (gt | lt | eq)**
                 claves de las interfaces:
                     * interfaz: interfaz a la que se va a aplicar la lista (formatos validos fa 0/0 y fast ethernet 0/0)
                     * listAcl: lista con todas las acl que se quieren aplicar a esa interfaz y el tipo de accion
@@ -135,8 +134,8 @@ def confAcl(settings):
     for acl in settings['acls']:
         sentence = "access-list %s %s " % (acl['list'], acl['action'])  # añado la lista y la accion de la sentencia
         """ 07/03/2023 no funciona en los routers testeados
-        if 'socketTipe' in acl:  # Contiene un tipo de socket 
-            sentence += acl['socketTipe'] + ' source ' 
+        if 'sockettype' in acl:  # Contiene un tipo de socket 
+            sentence += acl['sockettype'] + ' source ' 
         """
         if 'orNetmask' in acl:  # contiene mascara para el origen
             sentence += acl['origin'] + ' ' + acl['orNetmask'] + ' '
@@ -159,7 +158,7 @@ def confAcl(settings):
             sentence += 'eq ' + acl['protocol']
         config_acl.append(sentence)
     output = device.send_config_set(config_acl)
-    for interface in settings['interfaces']:
+    for interface in settings['interfaces_acl']:
         apply_acl = []
         apply_acl.append('interface %s ' % interface['interface'])
         for listAcl in interface['list_acl']:
@@ -188,7 +187,7 @@ if __name__ == '__main__':
                  'interfaces': interface
                  }
 
-    # confIp(config_ip)
+    #confIp(config_ip)
 
     routes_static = [{'origin': '10.0.0.0',
                       'orNetmask': '255.255.255.0',
@@ -204,7 +203,7 @@ if __name__ == '__main__':
                   }
     config_route = {'router': 'cisco_ios',
                     'port': '5001',
-                    'tipe': 'rip',
+                    'type': 'rip',
                     'routes': routes_rip
                     }
     # confRoute(config_route)
@@ -218,7 +217,7 @@ if __name__ == '__main__':
             'origin': '10.0.2.14',
             'dest': '10.0.0.0',
             'destNetmask': '255.255.255.0',
-            'socketTipe': 'tcp',
+            'sockettype': 'tcp',
             'protocol': '25'
             }
            ]
@@ -229,6 +228,6 @@ if __name__ == '__main__':
     config_acl = {'router': 'cisco_ios',
                   'port': '5001',
                   'acls': acl,
-                  'interfaces': list_acl
+                  'interfaces_acl': list_acl
                   }
     confAcl(config_acl)

@@ -6,10 +6,12 @@ Actualmente se ha provado en los swithces proporcionados por gns3, generando la 
 """
 """
 Se conecta a un switch a traves de telnet desplegado en gns3 instalado en la maquina local.
-
 Parametros de entrada:
     + switch: tipo de switch (validado para switch proporcionado por gns3)
     + port: puerto que esta abierto para realizar la conexion
+    
+Devuelve:
+    + device: conector al switch
 
 Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro host, si se quiere conectar al router 
 directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir 
@@ -60,12 +62,6 @@ def confVlan(settings):
 
 
 if __name__ == '__main__':
-    """
-    device = connectSwitch("cisco_ios", 5000)
-    command = ["enable","show running-config"]
-    for x in command:
-        print(device.send_command(x))
-    """
     try: # hablita la terminal para poder enviar la configuracion
         device = connectSwitch("cisco_ios", 5000)
         device.send_command('enable')

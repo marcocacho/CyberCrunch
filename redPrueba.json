@@ -1,7 +1,8 @@
 {
   "R1": {
+    "machineType": "router",
     "router": "cisco_ios",
-    "port": "5001",/* el puerto se lee al añadir el equipo*/
+    "port": "5001",
     "interfaces": [
       {
         "iface": "fa0/0",
@@ -47,7 +48,7 @@
         "protocol": "25"
       }
     ],
-    "interfaces": [
+    "interfaces_acl": [
       {
         "interface": "fa0/0",
         "list_acl": [
@@ -60,8 +61,9 @@
     ]
   },
   "S1": {
+    "machineType": "switch",
     "switch": "cisco_ios",
-    "port": "5000",/* el puerto se lee al añadir el equipo*/
+    "port": "5000",
     "vlans": [
       {
         "number": "trunk",
