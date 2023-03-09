@@ -1,5 +1,91 @@
 {
- "R1": {
-
- }
+  "R1": {
+    "router": "cisco_ios",
+    "port": "5001",/* el puerto se lee al añadir el equipo*/
+    "interfaces": [
+      {
+        "iface": "fa0/0",
+        "ip": "10.0.0.1",
+        "netmask": "255.255.255.0"
+      },
+      {
+        "iface": "fa1/0",
+        "ip": "10.0.1.1",
+        "netmask": "255.255.255.0",
+        "nat": "inside"
+      },
+      {
+        "iface": "fa2/0",
+        "ip": "10.0.2.1",
+        "netmask": "255.255.255.0",
+        "nat": "asd"
+      }
+    ],
+    "tipe": "rip",
+    "routes": {
+      "version": "2",
+      "networks": [
+        "10.0.0.0",
+        "10.0.1.0",
+        "10.0.2.0"
+      ]
+    },
+    "acls": [
+      {
+        "list": "1",
+        "action": "permit",
+        "origin": "10.0.1.0",
+        "orNetmask": "255.255.255.0"
+      },
+      {
+        "list": "1",
+        "action": "deny",
+        "origin": "10.0.2.14",
+        "dest": "10.0.0.0",
+        "destNetmask": "255.255.255.0",
+        "socketTipe": "tcp",
+        "protocol": "25"
+      }
+    ],
+    "interfaces": [
+      {
+        "interface": "fa0/0",
+        "list_acl": [
+          {
+            "list": "1",
+            "action": "out"
+          }
+        ]
+      }
+    ]
+  },
+  "S1": {
+    "switch": "cisco_ios",
+    "port": "5000",/* el puerto se lee al añadir el equipo*/
+    "vlans": [
+      {
+        "number": "trunk",
+        "interfaces": [
+          "Gi 0/0"
+        ]
+      },
+      {
+        "number": "10",
+        "name": "prueba",
+        "interfaces": [
+          "Gi 0/1",
+          "Gi 0/2"
+        ]
+      },
+      {
+        "number": "20",
+        "name": "prueba2",
+        "interfaces": [
+          "Gi 1/1",
+          "Gi 1/2"
+        ]
+      }
+    ]
+  }
 }
+
