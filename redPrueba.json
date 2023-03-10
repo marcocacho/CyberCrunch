@@ -1,6 +1,7 @@
 {
   "R1": {
     "machineType": "router",
+    "template": "c7200",
     "router": "cisco_ios",
     "port": "5001",
     "interfaces": [
@@ -62,6 +63,7 @@
   },
   "S1": {
     "machineType": "switch",
+    "template": "Cisco IOSvL2 15.2(4.0.55)E",
     "switch": "cisco_ios",
     "port": "5000",
     "vlans": [
