@@ -1,0 +1,12 @@
+Json compuesto de nombres de los elemetos o la lista de conexiones.
+
+si es nombre de elemento se van a diferenciar 3 elementos distintos: router, switch o pc
+Para un router:
+
+Para un switch:
+
+Para un pc:
+
+
+La lista de conexiones (connection_list) tiene el siguiente formato por cada interfaz que se quiere conectar:
+    [{name: nombre, interface: interfaz},{name: nombre, interface: interfaz}]

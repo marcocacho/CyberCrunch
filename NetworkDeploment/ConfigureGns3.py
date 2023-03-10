@@ -53,7 +53,7 @@ def CreateLinks(lab, server, node1, node2):
     for port in lab.get_node(node1['name']).ports:
         if port['name'] == node1['interface'] or port['short_name'] == node1['interface']:
             adapter_node1 = port['adapter_number']
-            port_number1  = port['port_number']
+            port_number1 = port['port_number']
 
     for port in lab.get_node(node2['name']).ports:
         if port['name'] == node2['interface'] or port['short_name'] == node2['interface']:
@@ -74,8 +74,8 @@ if __name__ == '__main__':
     # Inicializamos la API de GNS3
     gns3_server = Gns3Connector(url="http://127.0.0.1:3080")
     lab: Project = openProject(gns3_server, "test_lab")
-    node1 = {'name': 'R2',
-          'interface': 'FastEthernet0/0'}
+    node1 = {"name": "R2",
+          "interface": "FastEthernet0/0"}
     node2 = {'name': 'S2',
              'interface': 'Gi0/0'}
     CreateLinks(lab, gns3_server, node1, node2)

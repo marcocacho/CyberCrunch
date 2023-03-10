@@ -90,6 +90,18 @@
         ]
       }
     ]
-  }
+  },
+  "connection_list": [
+    [
+      {
+        "name": "R1",
+        "interface": "FastEthernet0/0"
+      },
+      {
+        "name": "S1",
+        "interface": "Gi0/0"
+      }
+    ]
+  ]
 }
 
