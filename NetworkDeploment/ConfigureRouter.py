@@ -44,6 +44,8 @@ Parametros de entrada:
                     * nat(optional): nateo de la interfaz (inside o outside) (no necesario)
 
 """
+
+
 def confIp(settings):
     device = connectRouter(settings['router'], settings['port'])
     for interface in settings['interfaces']:
@@ -110,10 +112,9 @@ Parametros de entrada:
                     * orNetmask(optional): mascara de red de la ip de origen
                     * dest(optional): ip de destino
                     * destNetmask(optional): ascara de red de la ip de destino
-                    * sockettype(optional): tipo de socket ( ip | tcp | udp | icmp)
-                    * comparation(optinal): comparacion que se va a aplicar al protocolo o puerto, en caso de haber
-                        puerto y protocolo y no se le aplica se presupone que va a ser 
-                    * protocol(optional): protocolo o puerto sobre el que se aplica la acl
+                    * protocol(optional): tipo de socket ( ip | tcp | udp | icmp)
+                    * operator(optinal): comparacion que se va a aplicar al puerto, en caso de omision se aplicara un eq
+                    * port(optional): pnumero o nombre del puerto sobre el que se aplica la acl
             - interfaces_acl: interfaz del router donde se van a aplicar las eq por defecto (gt | lt | eq)**
                 claves de las interfaces:
                     * interfaz: interfaz a la que se va a aplicar la lista (formatos validos fa 0/0 y fast ethernet 0/0)
@@ -133,10 +134,9 @@ def confAcl(settings):
     config_acl = []
     for acl in settings['acls']:
         sentence = "access-list %s %s " % (acl['list'], acl['action'])  # añado la lista y la accion de la sentencia
-        """ 07/03/2023 no funciona en los routers testeados
-        if 'sockettype' in acl:  # Contiene un tipo de socket 
-            sentence += acl['sockettype'] + ' source ' 
-        """
+
+        if 'protocol' in acl:  # Contiene un tipo protocolo
+            sentence += acl['protocol'] + ' '
         if 'orNetmask' in acl:  # contiene mascara para el origen
             sentence += acl['origin'] + ' ' + acl['orNetmask'] + ' '
         else:
@@ -152,10 +152,11 @@ def confAcl(settings):
                     sentence += acl['dest'] + ' '
                 else:
                     sentence += 'host ' + acl['dest'] + ' '
-        if 'protocol' in acl:  # añade un protocolo o puerto para la sentencia
-            if 'comparation' in acl:
-                sentence += acl['comparation'] + ' ' + acl['protocol']
-            sentence += 'eq ' + acl['protocol']
+        if 'port' in acl:  # añade un puerto para la sentencia
+            if 'operator' in acl:
+                sentence += acl['operator'] + ' ' + acl['port']
+            else:
+                sentence += 'eq ' + acl['port']
         config_acl.append(sentence)
     output = device.send_config_set(config_acl)
     for interface in settings['interfaces_acl']:
@@ -187,7 +188,7 @@ if __name__ == '__main__':
                  'interfaces': interface
                  }
 
-    #confIp(config_ip)
+    # confIp(config_ip)
 
     routes_static = [{'origin': '10.0.0.0',
                       'orNetmask': '255.255.255.0',
@@ -207,22 +208,23 @@ if __name__ == '__main__':
                     'routes': routes_rip
                     }
     # confRoute(config_route)
-    acl = [{'list': '1',
+    acl = [{'list': '10',
             'action': 'permit',
             'origin': '10.0.1.0',
             'orNetmask': '255.255.255.0',
             },
-           {'list': '1',
+           {'list': '110',
             'action': 'deny',
             'origin': '10.0.2.14',
             'dest': '10.0.0.0',
             'destNetmask': '255.255.255.0',
-            'sockettype': 'tcp',
-            'protocol': '25'
+            'protocol': 'tcp',
+            'port': '25'
             }
            ]
     list_acl = [{'interface': 'fa0/0',
-                 'list_acl': [{'list': '1', 'action': 'out'}]
+                 'list_acl': [{'list': '10', 'action': 'out'},
+                              {'list': '110', 'action': 'out'}]
 
                  }]
     config_acl = {'router': 'cisco_ios',
