@@ -3,7 +3,6 @@
     "machineType": "router",
     "template": "c7200",
     "router": "cisco_ios",
-    "port": "5001",
     "interfaces": [
       {
         "iface": "fa0/0",
@@ -23,7 +22,7 @@
         "nat": "asd"
       }
     ],
-    "tipe": "rip",
+    "type": "rip",
     "routes": {
       "version": "2",
       "networks": [

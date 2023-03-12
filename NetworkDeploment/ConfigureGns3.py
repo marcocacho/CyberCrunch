@@ -25,18 +25,20 @@ def openProject(server, name):
     return lab
 
 
-def AddNode(name, lab, node):
+def addNode(name, lab, node):
     """
-    Añade un nuevo nodo al proyecto GNS3 con el nombre indicado
+    Añade un nuevo nodo al proyecto GNS3 con el nombre indicado y lo levanta
     :param name: nombre que se le va a otorgar al nodo
     :param lab: laboratorio de gns3 abierto
     :param node: template selecionado de los disponibles
-    :return: None
+    :return: puerto donde se abrio la consola
     """
     lab.create_node(name=name, template=node)
+    nodo = lab.get_node(name)
+    nodo.start()
+    return nodo.console
 
-
-def CreateLinks(lab, server, node1, node2):
+def createLinks(lab, server, node1, node2):
     """
     Crea un enlace entre dos interfaces de dos nodos del proyecto
     :param lab: laboratorio de gns3 abierto
@@ -78,6 +80,6 @@ if __name__ == '__main__':
           "interface": "FastEthernet0/0"}
     node2 = {'name': 'S2',
              'interface': 'Gi0/0'}
-    CreateLinks(lab, gns3_server, node1, node2)
+    createLinks(lab, gns3_server, node1, node2)
     for template in gns3_server.get_templates():
         print(f"Template: {template['name']} -- ID: {template['template_id']}")
