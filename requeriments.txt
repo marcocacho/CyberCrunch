@@ -2,3 +2,5 @@ gns3fy
 pydantic==1.9.2
 netmiko
 json
+time
+threading

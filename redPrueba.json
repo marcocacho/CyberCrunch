@@ -14,12 +14,6 @@
         "ip": "10.0.1.1",
         "netmask": "255.255.255.0",
         "nat": "inside"
-      },
-      {
-        "iface": "fa2/0",
-        "ip": "10.0.2.1",
-        "netmask": "255.255.255.0",
-        "nat": "asd"
       }
     ],
     "type": "rip",
@@ -27,8 +21,7 @@
       "version": "2",
       "networks": [
         "10.0.0.0",
-        "10.0.1.0",
-        "10.0.2.0"
+        "10.0.1.0"
       ]
     },
     "acls": [
@@ -64,11 +57,36 @@
       }
     ]
   },
+  "R2":{"machineType": "router",
+    "template": "c7200",
+    "router": "cisco_ios",
+    "interfaces": [
+      {
+        "iface": "fa0/0",
+        "ip": "10.0.0.2",
+        "netmask": "255.255.255.0"
+      },
+      {
+        "iface": "fa1/0",
+        "ip": "10.1.0.1",
+        "netmask": "255.255.255.0",
+        "nat": "inside"
+      }
+    ],
+    "type": "rip",
+    "routes": {
+      "version": "2",
+      "networks": [
+        "10.0.0.0",
+        "10.1.0.0",
+        "10.2.0.0"
+      ]
+    }
+  },
   "S1": {
     "machineType": "switch",
     "template": "Cisco IOSvL2 15.2(4.0.55)E",
     "switch": "cisco_ios",
-    "port": "5000",
     "vlans": [
       {
         "number": "trunk",
@@ -78,21 +96,31 @@
       },
       {
         "number": "10",
-        "name": "prueba",
+        "name": "Vlan 10",
         "interfaces": [
-          "Gi 0/1",
-          "Gi 0/2"
+          "Gi 1/0"
         ]
       },
       {
         "number": "20",
-        "name": "prueba2",
+        "name": "Vlan 20",
         "interfaces": [
-          "Gi 1/1",
-          "Gi 1/2"
+          "Gi 2/0"
         ]
       }
     ]
+  },
+  "Alumno": {
+    "machineType": "docker",
+    "template": "ubuntu"
+  },
+    "D1": {
+    "machineType": "docker",
+    "template": "ubuntu"
+  },
+    "D2": {
+    "machineType": "docker",
+    "template": "ubuntu"
   },
   "connection_list": [
     [
@@ -101,8 +129,48 @@
         "interface": "FastEthernet0/0"
       },
       {
+        "name": "R2",
+        "interface": "f0/0"
+      }
+    ],
+    [
+      {
+        "name": "R2",
+        "interface": "FastEthernet2/0"
+      },
+      {
         "name": "S1",
         "interface": "Gi0/0"
+      }
+    ],
+    [
+      {
+        "name": "D2",
+        "interface": "eth0"
+      },
+      {
+        "name": "S1",
+        "interface": "Gi2/0"
+      }
+    ],
+    [
+      {
+        "name": "D1",
+        "interface": "eth0"
+      },
+      {
+        "name": "S1",
+        "interface": "Gi1/0"
+      }
+    ],
+    [
+      {
+        "name": "R1",
+        "interface": "f1/0"
+      },
+      {
+        "name": "Alumno",
+        "interface": "eth0"
       }
     ]
   ]

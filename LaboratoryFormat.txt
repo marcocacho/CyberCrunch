@@ -1,12 +1,42 @@
 Json compuesto de nombres de los elemetos o la lista de conexiones.
 
-si es nombre de elemento se van a diferenciar 3 elementos distintos: router, switch o pc
+si se trata de un nombre de un nodo se van a diferenciar 3 posibles nodos distintos: router, switch o docker
 Para un router:
+    "nombre":{
+        "machineType": "router",
+        "template": template del router,
+        "router": tipo de SO del router,
+        "interfaces": lista de interfaces con: {"iface": interfaz, "ip": "ip, "netmask": mascarade la red}
+        "acls": lista de las acls con: { "list": numero de la lista, "action": accion,"origin": ip origen,
+                "orNetmask": mascara origen,"dest": ip destino,"destNetmask": mascara destino, "protocol": protocolo,
+                    "protocol": protocolo por nombre o numero},
+        "interfaces_acl": lista de las acl y donde se aplican con:{ "interface": interfaz, "list_acl": lista con las acl:
+            {"list": numero de la lista,"action": cuando se aplica}
+    }
 
 Para un switch:
+     "nombre":{
+        "machineType": "switch",
+        "template": template del switch,
+        "switch": tipo de SO del switch,
+        "vlans": lista con las vlans que se aplicacan con:{"number": numero de la vlan o trunk,
+            "interfaces": lista con las interfaces}
+     }
 
-Para un pc:
-
+Para un docker:
+    "nombre":{
+        "machineType": "docker",
+        "template": template del docker,
+        #falta la configuracion del docker.
+    }
 
 La lista de conexiones (connection_list) tiene el siguiente formato por cada interfaz que se quiere conectar:
     [{name: nombre, interface: interfaz},{name: nombre, interface: interfaz}]
+
+"vlans": [
+      {
+        "number": "trunk",
+        "interfaces": [
+          "Gi 0/0"
+        ]
+      },

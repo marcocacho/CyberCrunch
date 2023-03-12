@@ -60,7 +60,7 @@ def createLinks(lab, server, node1, node2):
     for port in lab.get_node(node2['name']).ports:
         if port['name'] == node2['interface'] or port['short_name'] == node2['interface']:
             adapter_node2 = port['adapter_number']
-            port_number2  = port['port_number']
+            port_number2 = port['port_number']
     #lista con los nodos ha conectar
     nodes = [
         dict(node_id=lab.get_node(node1['name']).node_id, adapter_number=adapter_node1, port_number=port_number1),

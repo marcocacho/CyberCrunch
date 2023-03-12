@@ -7,14 +7,6 @@ import NetworkDeploment.ConfigureGns3
 import NetworkDeploment.ConfigureSwitch
 import NetworkDeploment.ConfigureMachine
 
-
-"""
-
-    file: fichero donde se contiene la red que se desea desplegar con el formato descrito en LaboratoryFormat.txt,
-        
-"""
-
-
 def readJson(file):
     """
     Se encarga de ir leyendo los distintos elementos de la red y ir configurandolos paso a paso:
@@ -44,7 +36,9 @@ def readJson(file):
                                                      args=(lab, deviceName, settings))
                 hilos[deviceName].start()
             elif settings["machineType"] == "docker":
-                print("docker")
+                hilos[deviceName] = threading.Thread(name=deviceName, target=configureDocker,
+                                                     args=(lab, deviceName, settings))
+                hilos[deviceName].start()
     for deviceName in hilos:
         if not deviceName == "connection_list":
             hilos[deviceName].join()
@@ -63,7 +57,7 @@ def configureRouter(lab, name, settings):
     :return: None
     """
     port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
-    time.sleep(10) # tiempo de espera a que se encienda el equipo
+    time.sleep(30) # tiempo de espera a que se encienda el equipo
     if "interfaces" in settings:
         config_ip = {"router": settings["router"], "port": port, "interfaces": settings["interfaces"]}
         NetworkDeploment.ConfigureRouter.confIp(config_ip)
@@ -84,7 +78,7 @@ def configureSwitch(lab, name, settings):
     :param lab: laboratorio de gns3 abierto
     :param name: nombre que se le va a otorgar al nodo
     :param settings: diicionario con los datos a configurar con el formato descrito en LaboratoryFormat.txt
-    :return:
+    :return: None
     """
     port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
     time.sleep(60) # tiempo de espera a que se encienda el equipo
@@ -94,6 +88,17 @@ def configureSwitch(lab, name, settings):
         NetworkDeploment.ConfigureSwitch.confVlan(config_vlan)
     print(f"{name} creado y configurado")
 
+def configureDocker(lab, name, settings):
+    """
+    Crea el nodo docker selecionado, lo enciende y lo configurarlo
+    :param lab: laboratorio de gns3 abierto
+    :param name: nombre que se le va a otorgar al nodo
+    :param settings: diicionario con los datos a configurar con el formato descrito en LaboratoryFormat.txt
+    :return: None
+    """
+    port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
+
+    print(f"{name} creado y configurado")
 def connectNodes(lab, server, conection_list):
     """
     Crea los enlaces entre los nodos de la red
@@ -104,6 +109,6 @@ def connectNodes(lab, server, conection_list):
     """
     for nodos in conection_list:
         NetworkDeploment.ConfigureGns3.createLinks(lab, server, nodos[0], nodos[1])
-    print ("Nodos Conectados")
+    print ("Nodos conectados")
 if __name__ == "__main__":
     readJson("redPrueba.json")
