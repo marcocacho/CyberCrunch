@@ -34,9 +34,9 @@ def addNode(name, lab, node):
     :return: puerto donde se abrio la consola
     """
     lab.create_node(name=name, template=node)
-    nodo = lab.get_node(name)
-    nodo.start()
-    return nodo.console
+    node = lab.get_node(name)
+    node.start()
+    return node.console
 
 def createLinks(lab, server, node1, node2):
     """
@@ -70,6 +70,14 @@ def createLinks(lab, server, node1, node2):
     link = Link(project_id=lab.project_id, connector=server, nodes=nodes)
     link.create()
 
+def getDockerId(name):
+    """
+    Devuelve el id del docker pedido
+    :param name: nombre del nodo
+    :return:
+    """
+    node = lab.get_node(name)
+    return node.properties.container_id
 #Se puede añadir una nueva funcion para añdir maquinas odockers, ejemplo para virtualbox en prueba Gns3
 
 if __name__ == '__main__':

@@ -47,6 +47,20 @@ Parametros de entrada:
 
 
 def confIp(settings):
+    """
+    Configura ip's de un router a traves de telnet
+    :param settings: diccionario con los datos de configuracion del router
+        claves:
+            - router: tipo de router que se va configurar
+            - port: puerto donde se va a relaziar la conexion telnet
+            - interfaces: lista interface o interfaces que se van a configurar
+                claves de cada interface:
+                    * iface: interfaz del router (formatos validos fa 0/0 y fast ethernet 0/0)
+                    * ip: ip de la interfaz router
+                    * netmask: mascara de la ip
+                    * nat(optional): nateo de la interfaz (inside o outside) (no necesario)
+    :return: None
+    """
     device = connectRouter(settings['router'], settings['port'])
     for interface in settings['interfaces']:
         config_iface = ['interface %s' % interface['iface'],

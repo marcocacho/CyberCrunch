@@ -6,12 +6,12 @@
     "interfaces": [
       {
         "iface": "fa0/0",
-        "ip": "10.0.0.1",
+        "ip": "192.168.0.1",
         "netmask": "255.255.255.0"
       },
       {
         "iface": "fa1/0",
-        "ip": "10.0.1.1",
+        "ip": "192.168.1.1",
         "netmask": "255.255.255.0",
         "nat": "inside"
       }
@@ -20,55 +20,24 @@
     "routes": {
       "version": "2",
       "networks": [
-        "10.0.0.0",
-        "10.0.1.0"
+        "192.168.0.0",
+        "192.168.1.0"
       ]
-    },
-    "acls": [
-      {
-        "list": "10",
-        "action": "permit",
-        "origin": "10.0.1.0",
-        "orNetmask": "255.255.255.0"
-      },
-      {
-        "list": "110",
-        "action": "deny",
-        "origin": "10.0.2.14",
-        "dest": "10.0.0.0",
-        "destNetmask": "255.255.255.0",
-        "socketTipe": "icmp",
-        "protocol": "25"
-      }
-    ],
-    "interfaces_acl": [
-      {
-        "interface": "fa0/0",
-        "list_acl": [
-          {
-            "list": "10",
-            "action": "out"
-          },
-           {
-            "list": "110",
-            "action": "out"
-          }
-        ]
-      }
-    ]
+    }
   },
-  "R2":{"machineType": "router",
+  "R2": {
+    "machineType": "router",
     "template": "c7200",
     "router": "cisco_ios",
     "interfaces": [
       {
         "iface": "fa0/0",
-        "ip": "10.0.0.2",
+        "ip": "192.168.0.2",
         "netmask": "255.255.255.0"
       },
       {
         "iface": "fa1/0",
-        "ip": "10.1.0.1",
+        "ip": "192.168.10.1",
         "netmask": "255.255.255.0",
         "nat": "inside"
       }
@@ -77,9 +46,9 @@
     "routes": {
       "version": "2",
       "networks": [
-        "10.0.0.0",
-        "10.1.0.0",
-        "10.2.0.0"
+        "192.168.0.0",
+        "192.168.10.0",
+        "192.168.20.0"
       ]
     }
   },
@@ -112,15 +81,15 @@
   },
   "Alumno": {
     "machineType": "docker",
-    "template": "ubuntu"
+    "template": "Ubuntu Docker Guest"
   },
-    "D1": {
+  "D1": {
     "machineType": "docker",
-    "template": "ubuntu"
+    "template": "Ubuntu Docker Guest"
   },
-    "D2": {
+  "D2": {
     "machineType": "docker",
-    "template": "ubuntu"
+    "template": "Ubuntu Docker Guest"
   },
   "connection_list": [
     [
