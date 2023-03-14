@@ -1,5 +1,5 @@
 import docker
-
+from ConfigureGns3 import getDockerId
 #cambiar por cone
 def connectDocker(id):
     """
@@ -12,7 +12,7 @@ def connectDocker(id):
 
 
 
-def configIp(settings):
+def configIp(settings, name, lab):
     """
     Configura la ip de un docker a traves de telnet
     :param settings: diccionario con los datos de configuracion del docker
@@ -28,7 +28,7 @@ def configIp(settings):
                     :return:
     """
 
-    #device = connectRouter(settings['docker'], settings['port'])
+    docker = connectDocker(getDockerId(name))
     for interface in settings['interfaces']:
         if interface["ip"].lower() == "dhcp":
             config_iface = "dhclient $s" % interface["iface"]
@@ -36,22 +36,4 @@ def configIp(settings):
             config_iface = ["ifconfig %s up;" % interface["iface"],
                             "ifconfig %s %s netmask %s;" % (interface["iface"], interface["ip"], interface["netmask"]),
                             "oute add default gw %s %s;" % (interface["gateway"], interface["iface"])]
-        print(config_iface)
-
-   #output = device.send_config_set(config_iface)
-
-
-if __name__ == '__main__':
-    config_ip = {'docker': 'linux',
-                 'port': '5000',
-                 'interfaces': [
-                     {
-                         "iface": "eth0",
-                         "ip": "192.168.1.2",
-                         "netmask": "255.255.255.0",
-                         "gateway": "192.168.1.1"
-                     }
-                 ]
-    }
-
-configIp(config_ip)
+        docker.exec_run(config_iface)
