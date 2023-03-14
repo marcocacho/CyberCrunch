@@ -1,4 +1,4 @@
-from netmiko import ConnectHandler, BaseConnection
+import docker
 
 #cambiar por cone
 def connectDocker(id):
@@ -7,12 +7,9 @@ def connectDocker(id):
     :param id: id del docker al que se quiere conectar
     :return: conector al docker
     """
-    device: BaseConnection = ConnectHandler(
-        device_type="generic_telnet",  # para so linux es linux
-        host="127.0.0.1",
-        port=port
-    )
-    return device
+    client = docker.from_env()
+    return client.containers.get(id)
+
 
 
 def configIp(settings):
