@@ -81,15 +81,27 @@
   },
   "Alumno": {
     "machineType": "docker",
-    "template": "Ubuntu Docker Guest"
+    "template": "Ubuntu Docker Guest",
+    "iface": "eth0",
+    "ip": "192.168.1.2",
+    "netmask": "255.255.255.0",
+    "gateway": "192.168.1.1"
   },
   "D1": {
     "machineType": "docker",
-    "template": "Ubuntu Docker Guest"
+    "template": "Ubuntu Docker Guest",
+    "iface": "eth0",
+    "ip": "192.168.10.2",
+    "netmask": "255.255.255.0",
+    "gateway": "192.168.10.1"
   },
   "D2": {
     "machineType": "docker",
-    "template": "Ubuntu Docker Guest"
+    "template": "Ubuntu Docker Guest",
+    "iface": "eth0",
+    "ip": "192.168.20.2",
+    "netmask": "255.255.255.0",
+    "gateway": "192.168.10.1"
   },
   "connection_list": [
     [

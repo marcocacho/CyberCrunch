@@ -6,6 +6,7 @@ import NetworkDeploment.ConfigureRouter
 import NetworkDeploment.ConfigureGns3
 import NetworkDeploment.ConfigureSwitch
 import NetworkDeploment.ConfigureMachine
+import NetworkDeploment.ConfigureDocker
 
 def readJson(file):
     """
@@ -97,7 +98,10 @@ def configureDocker(lab, name, settings):
     :return: None
     """
     port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
-
+    docker_id = NetworkDeploment.ConfigureGns3.getDockerId(name, lab)
+    NetworkDeploment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
+                                               "netmask": settings["netmask"],"gateway": settings["gateway"]},
+                                              docker_id)
     print(f"{name} creado y configurado")
 def connectNodes(lab, server, conection_list):
     """

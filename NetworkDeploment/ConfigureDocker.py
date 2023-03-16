@@ -1,6 +1,10 @@
 import docker
-from ConfigureGns3 import getDockerId
-#cambiar por cone
+
+"""
+Libreria de funciones para configurar un docker activo
+"""
+
+
 def connectDocker(id):
     """
     Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
@@ -11,29 +15,26 @@ def connectDocker(id):
     return client.containers.get(id)
 
 
-
-def configIp(settings, name, lab):
+def configIp(settings, docker_id):
     """
     Configura la ip de un docker a traves de telnet
     :param settings: diccionario con los datos de configuracion del docker
         claves:
-            - docker: tipo de docker que se va configurar
-            - port: puerto donde se va a relaziar la conexion telnet
-            - interfaces: lista interface o interfaces que se van a configurar
-                claves de cada interface:
-                    * iface: interfaz del router (formatos validos fa 0/0 y fast ethernet 0/0)
-                    * ip: ip de la interfaz o dhcp para usar un servidor dhcp
-                    * netmask(optional): mascara de la red
-                    * gateway(optional): router de salida
-                    :return:
+            - iface: interfaz del router (formatos validos fa 0/0 y fast ethernet 0/0)
+            - ip: ip de la interfaz o dhcp para usar un servidor dhcp
+            - netmask(optional): mascara de la red
+            - gateway(optional): router de salida
+    :param docker_id: id del docker que se quiere configurar
+    :return:
     """
 
-    docker = connectDocker(getDockerId(name))
-    for interface in settings['interfaces']:
-        if interface["ip"].lower() == "dhcp":
-            config_iface = "dhclient $s" % interface["iface"]
-        else:
-            config_iface = ["ifconfig %s up;" % interface["iface"],
-                            "ifconfig %s %s netmask %s;" % (interface["iface"], interface["ip"], interface["netmask"]),
-                            "oute add default gw %s %s;" % (interface["gateway"], interface["iface"])]
-        docker.exec_run(config_iface)
+    docker_connection = connectDocker(docker_id)
+    if settings["ip"].lower() == "dhcp":
+        config_iface = "dhclient $s" % settings["iface"]
+    else:
+        config_iface = ["ifconfig %s up" % settings["iface"],
+                        "ifconfig %s %s netmask %s" % (settings["iface"], settings["ip"], settings["netmask"]),
+                        "route add default gw %s %s" % (settings["gateway"], settings["iface"])]
+
+    for command in config_iface:
+        print(f"{settings['ip']}: {docker_connection.exec_run(command)}")

@@ -70,14 +70,16 @@ def createLinks(lab, server, node1, node2):
     link = Link(project_id=lab.project_id, connector=server, nodes=nodes)
     link.create()
 
-def getDockerId(name):
+def getDockerId(name, lab):
     """
     Devuelve el id del docker pedido
     :param name: nombre del nodo
+    :param lab: laboratorio de gns3 abierto donde se encuentra el nodo
     :return:
     """
     node = lab.get_node(name)
-    return node.properties.container_id
+    return node.properties["container_id"]
+
 #Se puede añadir una nueva funcion para añdir maquinas odockers, ejemplo para virtualbox en prueba Gns3
 
 if __name__ == '__main__':
