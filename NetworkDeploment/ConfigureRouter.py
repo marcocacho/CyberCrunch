@@ -63,14 +63,23 @@ def confIp(settings):
     """
     device = connectRouter(settings['router'], settings['port'])
     for interface in settings['interfaces']:
-        config_iface = ['interface %s' % interface['iface'],
-                        'ip address %s %s' % (interface['ip'], interface['netmask']),
-                        'no shutdown']
-
-        if 'nat' in interface:
-            nat = interface['nat']
-            if nat == 'inside' or nat == 'outside':
-                config_iface.append('ip nat %s' % nat)
+        config_iface = []
+        if "vlan" in interface:
+            config_iface.append('interface %s.%s' % (interface['iface'], interface["vlan"]))
+            config_iface.append("encapsulation dot1Q %s" % interface["vlan"])
+            config_iface.append('ip address %s %s' % (interface['ip'], interface['netmask']))
+            config_iface.append('no shutdown')
+            config_iface.append("exit")
+            config_iface.append('interface %s' % interface['iface'])
+            config_iface.append('no shutdown')
+        else:
+            config_iface.append('interface %s' % interface['iface'])
+            config_iface.append('ip address %s %s' % (interface['ip'], interface['netmask']))
+            config_iface.append('no shutdown')
+            if 'nat' in interface:
+                nat = interface['nat']
+                if nat == 'inside' or nat == 'outside':
+                    config_iface.append('ip nat %s' % nat)
 
         output = device.send_config_set(config_iface)
 
@@ -101,13 +110,17 @@ def confRoute(settings):
     if settings['type'] == 'static':  # si el tipo de enrutamiento es estatico.
         for route in settings['routes']:
             config_route.append('ip route %s %s %s' % (route['origin'], route['orNetmask'], route['dest']))
-    elif settings['type'] == 'rip':  # para el tipo de enrutamiento dinamico
+    elif settings['type'] == 'rip':  # para el tipo de enrutamiento dinamico con rip
         version = settings['routes']['version']
         networks = settings['routes']['networks']
         config_route.append('router rip')
         config_route.append('version %s' % version)
         for net in networks:
             config_route.append('network %s' % net)
+    elif settings['type'] == 'ospf':  # para el tipo de enrutamiento dinamico con ospf
+        config_route.append("router ospf 1")
+        for area in settings['routes']:
+            config_route.append("network %s %s area %s" % (area["ip"], area["wilcard"], area["area"]))
     output = device.send_config_set(config_route)
 
 
@@ -216,6 +229,9 @@ if __name__ == '__main__':
     routes_rip = {'version': '2',
                   'networks': ['10.0.0.0', '10.0.1.0', '10.0.2.0']
                   }
+    routes_ospf = [{"ip": "192.168.10.0", "wilcard": "0.0.0.255", "area": "1"},
+                   {"ip": "192.168.20.0", "wilcard": "0.0.0.255", "area": "1"},
+                   {"ip": "192.168.0.0", "wilcard": "0.0.0.255", "area": "1"}]
     config_route = {'router': 'cisco_ios',
                     'port': '5001',
                     'type': 'rip',

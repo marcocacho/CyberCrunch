@@ -37,4 +37,4 @@ def configIp(settings, docker_id):
                         "route add default gw %s %s" % (settings["gateway"], settings["iface"])]
 
     for command in config_iface:
-        print(f"{settings['ip']}: {docker_connection.exec_run(command)}")
+        docker_connection.exec_run(command)
