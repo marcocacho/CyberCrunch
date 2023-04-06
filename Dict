@@ -1,4 +1,0 @@
-R1:
-{'name': 'R2', 'type': 'router', 'links': [{'destinationName': 'R1', 'destinationInterface': 'FastEthernet0/0', 'interface': 'FastEthernet0/0'}, {'interface': 'FastEthernet0/1', 'destinationName': 'S1', 'destinationInterface': 'Gi0/0'}], 'ip': {'FastEthernet0/0': '192.168.0.2', 'FastEthernet1/0.10': '192.168.10.1', 'FastEthernet1/0.20': '192.168.20.1'}, 'protocol': '"ospf 1"'}
-S1:
-{'name': 'S1', 'type': 'router', 'links': [{'destinationName': 'R2', 'destinationInterface': 'FastEthernet0/1', 'interface': 'Gi0/0'}, {'destinationName': 'D2', 'destinationInterface': 'eth0', 'interface': 'Gi2/0'}, {'destinationName': 'D1', 'destinationInterface': 'eth0', 'interface': 'Gi1/0'}], 'vlans': {'1': ['Gi0/1', 'Gi0/2', 'Gi0/3', 'Gi1/1', 'Gi1/2', 'Gi1/3', 'Gi2/1', 'Gi2/2', 'Gi2/3', 'Gi3/0', 'Gi3/1', 'Gi3/2', 'Gi3/3'], '10': ['Gi1/0'], '20': ['Gi2/0']}}

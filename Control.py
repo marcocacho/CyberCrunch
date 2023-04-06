@@ -86,7 +86,7 @@ def getProtocolRouter(lab, name):
     device = connectRouter("cisco_ios", node.console)
     config = device.send_command("show ip protocol")
     words = config.split("\n")[2].split()
-    return words[3] + " " + words[4]
+    return (words[3] + " " + words[4]).replace('\"', '')
 
 
 def getVlanSwitch(lab, name):
