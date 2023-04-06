@@ -1,3 +1,5 @@
+from NetworkDeploment.ConfigureRouter import connectRouter
+
 
 def manageMachines(name, lab, action):
     """
@@ -21,4 +23,83 @@ def manageMachines(name, lab, action):
             print("No se encontro accion " + action)
     else:
         print("No existe el nodo seleccionado")
+
+
+def getLinkData(links_global, lab, name):
+    """
+    Consulta el nodo, interfaces con el que esta conectado el nodo dado
+    :param link: lista de enlace
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: diccionario con (interface, destinationInterface, destinationName)
+    """
+    allData = []
+    for links in links_global:
+        data = {}
+        in_node = False
+        for link in links.nodes:
+            node = lab.get_node(node_id=link["node_id"])
+            if node.name != name:  # compruebo si es el nodo destino
+                data["destinationName"] = node.name
+                data["destinationInterface"] = node.ports[link["adapter_number"]]["name"]
+            else:  # es el nodo origen
+                data["interface"] = node.ports[link["adapter_number"]]["name"]
+                in_node = True
+        if in_node:
+            allData.append(data)
+
+    return allData
+
+
+def getIpInfoRouter(lab, name):
+    """
+    Consulta la ip de las interfaces de un router
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: diccionario con las ip de las interfaces y sus ips
+    """
+    node = lab.get_node(name)
+    device = connectRouter("cisco_ios", node.console)
+    config = device.send_command("show ip interface brief")
+    data = {}
+    for i, line in enumerate(config.split("\n")):
+        if i == 0:
+            continue
+        else:
+            word = line.split()
+            k, v = word[:2]
+            if v != 'unassigned':
+                data[k] = v
+    return data
+
+
+def getProtocolRouter(lab, name):
+    """
+    Consulta el protocolo configurado en un router
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: devuelve el procolo configurado
+    """
+    node = lab.get_node(name)
+    device = connectRouter("cisco_ios", node.console)
+    config = device.send_command("show ip protocol")
+    words = config.split("\n")[2].split()
+    return words[3] + " " + words[4]
+
+
+def getInfoRouter(name, lab):
+    """
+    Solicta informacion considerada importante de un router
+    :param name: nombre del nodo
+    :param lab: laboratorio de gns3
+    :return: diccionario con los datos
+    """
+    node = lab.get_node(name)
+    data = {"name": name, "type": "router"}
+    data["links"] = getLinkData(lab.links, lab, name)
+    data["ip"] = getInfoRouter(lab, name)
+    data["protocol"] = getProtocolRouter(lab, name)
+
+    print(data)
+    return data
 
