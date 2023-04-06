@@ -1,4 +1,6 @@
 from NetworkDeploment.ConfigureRouter import connectRouter
+from NetworkDeploment.ConfigureSwitch import connectSwitch
+import re
 
 
 def manageMachines(name, lab, action):
@@ -87,6 +89,28 @@ def getProtocolRouter(lab, name):
     return words[3] + " " + words[4]
 
 
+def getVlanSwitch(lab, name):
+    """
+    Consulta las vlans existentes en un switch, junto con la interfaz a la que pertenece
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: devuelve un dicionaro con las vlans y las intefaces que pertenece
+    """
+    node = lab.get_node(name)
+    device = connectSwitch("cisco_ios", node.console)
+    config = device.send_command("show vlan brief")
+
+    vlans = {}
+    for line in config.split("\n")[2:]:
+        match = re.match(r'^s*(\d+)\s+(\S+(?: \d+)?)\s+(\S+)\s(.+)$', line)
+        if match:
+            id = match.group(1)
+            interfaces = (match.group(4).replace(',', '').split())
+            vlans[id] = interfaces
+
+    return vlans
+
+
 def getInfoRouter(name, lab):
     """
     Solicta informacion considerada importante de un router
@@ -94,12 +118,23 @@ def getInfoRouter(name, lab):
     :param lab: laboratorio de gns3
     :return: diccionario con los datos
     """
-    node = lab.get_node(name)
     data = {"name": name, "type": "router"}
     data["links"] = getLinkData(lab.links, lab, name)
-    data["ip"] = getInfoRouter(lab, name)
+    data["ip"] = getIpInfoRouter(lab, name)
     data["protocol"] = getProtocolRouter(lab, name)
 
-    print(data)
     return data
 
+
+def getInfoSwithch(name, lab):
+    """
+    Solicta informacion considerada importante de un switch
+    :param name: nombre del nodo
+    :param lab: laboratorio de gns3
+    :return: diccionario con los datos
+    """
+    data = {"name": name, "type": "router"}
+    data["links"] = getLinkData(lab.links, lab, name)
+    data["vlans"] = getVlanSwitch(lab, name)
+
+    return data
