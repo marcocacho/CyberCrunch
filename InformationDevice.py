@@ -1,31 +1,8 @@
 from NetworkDeploment.ConfigureRouter import connectRouter
 from NetworkDeploment.ConfigureSwitch import connectSwitch
+from NetworkDeploment.ConfigureDocker import connectDocker
+from NetworkDeploment.ConfigureGns3 import getDockerId
 import re
-
-
-def manageMachines(name, lab, action):
-    """
-    Funcion encargada de modifica una maquina de un proyencto de gns3
-    :param name: nombre del nodo de la red sobre el que se quiere actuar
-    :param lab: laboratorio de gns3
-    :param action: accion que se quiere realizar (start, stop, reload, suspend, delete, status)
-    :return: None
-    """
-    node = lab.get_node(name)
-    if node is not None:
-        action_dict = {"start": node.start,
-                       "stop": node.stop,
-                       "reload": node.reload,
-                       "suspend": node.suspend,
-                       "delete": node.delete}
-        select = action_dict.get(action)
-        if select is not None:
-            select()
-        else:
-            print("No se encontro accion " + action)
-    else:
-        print("No existe el nodo seleccionado")
-
 
 def getLinkData(links_global, lab, name):
     """
@@ -35,7 +12,7 @@ def getLinkData(links_global, lab, name):
     :param name: nombre del nodo
     :return: diccionario con (interface, destinationInterface, destinationName)
     """
-    allData = []
+    all_data = []
     for links in links_global:
         data = {}
         in_node = False
@@ -48,9 +25,9 @@ def getLinkData(links_global, lab, name):
                 data["interface"] = node.ports[link["adapter_number"]]["name"]
                 in_node = True
         if in_node:
-            allData.append(data)
+            all_data.append(data)
 
-    return allData
+    return all_data
 
 
 def getIpInfoRouter(lab, name):
@@ -104,13 +81,42 @@ def getVlanSwitch(lab, name):
     for line in config.split("\n")[2:]:
         match = re.match(r'^s*(\d+)\s+(\S+(?: \d+)?)\s+(\S+)\s(.+)$', line)
         if match:
-            id = match.group(1)
+            vlan_id = match.group(1)
             interfaces = (match.group(4).replace(',', '').split())
-            vlans[id] = interfaces
+            vlans[vlan_id] = interfaces
 
     return vlans
+def getGatewayLinux(lab, name):
+    """
+    Consulta la Ip del gateway de un dispositivo linux
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: Ip del gateway
+    """
+    docker_connection = connectDocker(getDockerId(name, lab))
+    result = docker_connection.exec_run("route")
+    config = result.output.decode("utf-8")
+    gateway_match = re.search(r"^default\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config, re.MULTILINE)
+    if gateway_match:
+        return gateway_match.group(1)
+    else:
+        return None
 
-
+def getIpLinux(lab, name):
+    """
+    Consulta la Ip  de un equipo linux
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: Ip del equipo
+    """
+    docker_connection = connectDocker(getDockerId(name, lab))
+    result = docker_connection.exec_run("ifconfig eth0")
+    config = result.output.decode("utf-8")
+    gateway_match = re.search(r"^\s+inet\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config, re.MULTILINE)
+    if gateway_match:
+        return gateway_match.group(1)
+    else:
+        return None
 def getInfoRouter(name, lab):
     """
     Solicta informacion considerada importante de un router
@@ -118,10 +124,9 @@ def getInfoRouter(name, lab):
     :param lab: laboratorio de gns3
     :return: diccionario con los datos
     """
-    data = {"name": name, "type": "router"}
-    data["links"] = getLinkData(lab.links, lab, name)
-    data["ip"] = getIpInfoRouter(lab, name)
-    data["protocol"] = getProtocolRouter(lab, name)
+    node = lab.get_node(name)
+    data = {"name": name, "type": "router", "links": getLinkData(lab.links, lab, name),
+            "ip": getIpInfoRouter(lab, name), "protocol": getProtocolRouter(lab, name), "status": node.status}
 
     return data
 
@@ -133,8 +138,22 @@ def getInfoSwithch(name, lab):
     :param lab: laboratorio de gns3
     :return: diccionario con los datos
     """
-    data = {"name": name, "type": "router"}
-    data["links"] = getLinkData(lab.links, lab, name)
-    data["vlans"] = getVlanSwitch(lab, name)
+    node = lab.get_node(name)
+    data = {"name": name, "type": "Switch", "links": getLinkData(lab.links, lab, name),
+            "vlans": getVlanSwitch(lab, name), "status": node.status}
+
+    return data
+
+
+def getInfoLinux(name, lab):
+    """
+    Solicta informacion considerada importante de un equipo linux
+    :param name: nombre del nodo
+    :param lab: laboratorio de gns3
+    :return: diccionario con los datos
+    """
+    node = lab.get_node(name)
+    data = {"name": name, "type": "Linux", "links": getLinkData(lab.links, lab, name),
+            "ip": getIpLinux(lab, name),"gateway": getGatewayLinux(lab, name), "status": node.status}
 
     return data

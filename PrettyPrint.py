@@ -5,7 +5,8 @@ def prettyRouterInfo(dictionary):
     :return: NONE
     """
     # Print name and type
-    print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nProtocol: {dictionary['protocol']}\n")
+    print(
+        f"Name: {dictionary['name']}\nType: {dictionary['type']}\nProtocol: {dictionary['protocol']}\nStatus: {dictionary['status']}\n")
 
     # Print links in a subtable
     links = dictionary['links']
@@ -30,7 +31,7 @@ def prettySwitchInfo(dictionary):
     :return: NONE
     """
     # Print name and type
-    print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\n")
+    print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nStatus: {dictionary['status']}\n")
 
     # Print links in a subtable
     links = dictionary['links']
@@ -43,4 +44,22 @@ def prettySwitchInfo(dictionary):
                 vlan_name = vlan
                 exit
         print("{:<20} {:<20} {:<20} {:<20}".format(link['interface'], vlan_name, link['destinationName'],
+                                                   link['destinationInterface']))
 
+
+def prettyLinuxInfo(dictionary):
+    """
+    Imprime los datos proporcionados de un equipo Linux de manera legible
+    :param dictionary: diccionario con los datos de un router
+    :return: NONE
+    """
+    # Print name and type
+    print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nStatus: {dictionary['status']}\n")
+    print(f"Ip: {dictionary['ip']}\tGateway:{dictionary['gateway']}\n")
+
+    links = dictionary['links']
+    print("Links:")
+    print("{:<20} {:<20} {:<20}".format("Interface", "Destination Name", "Destination Interface"))
+    for link in links:
+        print("{:<20} {:<20} {:<20}".format(link['interface'], link['destinationName'], link['destinationInterface']))
+    print()
