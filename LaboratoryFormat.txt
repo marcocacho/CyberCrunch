@@ -1,6 +1,10 @@
 Json compuesto de nombres de los elemetos o la lista de conexiones.
-
-si se trata de un nombre de un nodo se van a diferenciar 3 posibles nodos distintos: router, switch o docker
+Para un laboratorio:
+    "labName": name
+    "labDesc": string
+    "labManageNet": ip
+    "logServer": ip
+    "components": -> si se trata de un nombre de un nodo se van a diferenciar 3 posibles nodos distintos: router, switch o docker
 Para un router:
     "nombre":{
         "machineType": "router",
