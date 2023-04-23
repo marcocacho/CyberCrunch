@@ -60,7 +60,7 @@ def confVlan(settings):
                 config_vlan.append('switchport access vlan %s' % vlan['number'])
                 config_vlan.append('no shutdown')
         output = device.send_config_set(config_vlan)
-        device.disconnect()
+    device.disconnect()
 
 
 if __name__ == '__main__':

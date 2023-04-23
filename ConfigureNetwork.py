@@ -26,12 +26,12 @@ def readJson(file):
         for iface in network["components"][nat["router"]]["interfaces"]:
             iface["nat"] = "inside"
         network["components"][nat["router"]]["interfaces"].append({"iface": nat["iface"], "nat": "outside"})
+        network["connection_list"].append([{"name": nat["router"], "interface": nat["iface"]},
+                                         {"name": "NAT", "interface": nat["nat"]}])
+        nat["SO"] = network["components"][nat["router"]]["router"]
+        hilos["nat"] = threading.Thread(name="nat", target=configureNat,
+                                             args=(lab, "NAT", nat))
     for deviceName, settings in network["components"].items():
-        if deviceName == "connection_list":  # apartado de crear las conexiones entre maquinas
-            hilos[deviceName] = threading.Thread(name=deviceName, target=connectNodes,
-                                                 args=(lab, gns3_server, settings))
-        else:  # apartado de crear los nodos y configurarlos
-
             if settings["machineType"] == "switch":
                 hilos[deviceName] = threading.Thread(name=deviceName, target=configureSwitch,
                                                      args=(lab, deviceName, settings))
@@ -44,10 +44,17 @@ def readJson(file):
                 hilos[deviceName] = threading.Thread(name=deviceName, target=configureDocker,
                                                      args=(lab, deviceName, settings))
                 hilos[deviceName].start()
+    if "connection_list" in network:  # apartado de crear las conexiones entre maquinas
+        hilos["connection_list"] = threading.Thread(name="connection_list", target=connectNodes,
+                                                 args=(lab, gns3_server, network["connection_list"]))
+
+
     for deviceName in hilos:
-        if not deviceName == "connection_list":
+        if not (deviceName == "connection_list" or deviceName == "nat"):
             hilos[deviceName].join()
     #añadir aqui la cracion del nat
+    hilos["nat"].start()
+    hilos["nat"].join()
     hilos["connection_list"].start()
     hilos["connection_list"].join()
     print(f"Red {lab_name} creada y configura")
@@ -76,6 +83,11 @@ def configureRouter(lab, name, settings):
         config_acl = {"router": settings["router"], "port": port, "acls": settings["acls"],
                       "interfaces_acl": settings["interfaces_acl"]}
         NetworkDeploment.ConfigureRouter.confAcl(config_acl)
+    if "gateway" in settings:
+        config_default_route ={"router": settings["router"], "port": port, "type": "static",
+                               "routes": [{"origin": "0.0.0.0", "orNetmask": "0.0.0.0","dest": settings["gateway"]}]}
+        NetworkDeploment.ConfigureRouter.confRoute(config_default_route)
+
     NetworkDeploment.ConfigureRouter.saveConfiguration(settings["router"], port)
 
     print(f"{name} creado y configurado")
@@ -133,12 +145,11 @@ def configureNat(lab, name, settings):
     :param settings: diicionario con los datos a configurar con el formato descrito en LaboratoryFormat.txt
     :return: None
     """
-    #Se añade el nodo nat aqui
-    #Se necesita poner la interfaz del router en dhcp (ip address dhcp), nateo del router para outside(ip nat outside)
-    #se necesita poner las interfaces que no son del nat con nat inside (ip nat inside)
-    #Se tiene que configurar la acceslist (por ahora ip nat inside source list 1 interface fastEthernet 2/0 overload y access-list 1 permit any)
+    NetworkDeploment.ConfigureGns3.addNode(name, lab, "NAT")
+    port = lab.get_node(settings["router"]).console
+    NetworkDeploment.ConfigureRouter.confNateo(settings["SO"], port, settings["iface"])
     #no necesario poner ip domain-server 8.8.8.8 y ip domain-lookup
-    #resto de router añadir ruta por defecto con el mas cercano al nodo con nat (ip route 0.0.0.0 0.0.0.0 ip)
+    print(f"{name} creado y configurado")
 
 
 

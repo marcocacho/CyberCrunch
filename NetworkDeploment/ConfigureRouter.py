@@ -85,8 +85,7 @@ def confIp(settings):
                     config_iface.append('ip nat %s' % nat)
 
         output = device.send_config_set(config_iface)
-        device.disconnect()
-
+    device.disconnect()
 
 """
 Configura el enrutamiento de un router dado
@@ -216,6 +215,21 @@ def saveConfiguration(router, port):
 
     device.disconnect()
 
+def confNateo(router, port, iface):
+    """
+    Configura el nodo conectado a el nat para permitir conexiones del resto de nodos
+    :param router: tipo de SO del router
+    :param port: puerto por el que se va a conectar
+    :param iface: Interfaz por la que se conecta el nat
+    :return: None
+    """
+    device = connectRouter(router, port)
+    comands = ["ip nat inside source list 1 interface %s overload" % iface,
+               "access-list 1 permit any"]
+    output = device.send_config_set(comands)
+    device.send_config_set()
+
+    device.disconnect()
 if __name__ == '__main__':
     interface = [{'iface': 'fa0/0',
                   'ip': '10.0.0.1',

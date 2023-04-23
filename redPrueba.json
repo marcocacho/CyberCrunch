@@ -2,7 +2,8 @@
   "labName": "redPrueba",
   "nat": {
     "router": "R1",
-    "iface": "fa0/1"
+    "iface": "f0/1",
+    "nat": "nat0"
   },
   "components": {
     "R1": {
@@ -40,6 +41,7 @@
       "machineType": "router",
       "template": "c7200",
       "router": "cisco_ios",
+      "gateway": "192.168.1.1",
       "interfaces": [
         {
           "iface": "fa0/0",
@@ -130,59 +132,59 @@
       "ip": "192.168.20.2",
       "netmask": "255.255.255.0",
       "gateway": "192.168.20.1"
-    },
-    "connection_list": [
-      [
-        {
-          "name": "R1",
-          "interface": "FastEthernet0/0"
-        },
-        {
-          "name": "R2",
-          "interface": "f0/0"
-        }
-      ],
-      [
-        {
-          "name": "R2",
-          "interface": "FastEthernet1/0"
-        },
-        {
-          "name": "S1",
-          "interface": "Gi0/0"
-        }
-      ],
-      [
-        {
-          "name": "D2",
-          "interface": "eth0"
-        },
-        {
-          "name": "S1",
-          "interface": "Gi2/0"
-        }
-      ],
-      [
-        {
-          "name": "D1",
-          "interface": "eth0"
-        },
-        {
-          "name": "S1",
-          "interface": "Gi1/0"
-        }
-      ],
-      [
-        {
-          "name": "R1",
-          "interface": "f1/0"
-        },
-        {
-          "name": "Alumno",
-          "interface": "eth0"
-        }
-      ]
+    }
+  },
+  "connection_list": [
+    [
+      {
+        "name": "R1",
+        "interface": "FastEthernet0/0"
+      },
+      {
+        "name": "R2",
+        "interface": "f0/0"
+      }
+    ],
+    [
+      {
+        "name": "R2",
+        "interface": "FastEthernet1/0"
+      },
+      {
+        "name": "S1",
+        "interface": "Gi0/0"
+      }
+    ],
+    [
+      {
+        "name": "D2",
+        "interface": "eth0"
+      },
+      {
+        "name": "S1",
+        "interface": "Gi2/0"
+      }
+    ],
+    [
+      {
+        "name": "D1",
+        "interface": "eth0"
+      },
+      {
+        "name": "S1",
+        "interface": "Gi1/0"
+      }
+    ],
+    [
+      {
+        "name": "R1",
+        "interface": "f1/0"
+      },
+      {
+        "name": "Alumno",
+        "interface": "eth0"
+      }
     ]
-  }
+  ]
 }
 

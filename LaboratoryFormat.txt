@@ -7,13 +7,17 @@ Para un laboratorio:
     "nat": {
         "router": name,
         "iface": interfaz del router reservada para el nat
+        "nat": interfaz del nat
         }
     "components": -> si se trata de un nombre de un nodo se van a diferenciar 3 posibles nodos distintos: router, switch o docker
+    "connection_list": Lista de conexiones con el siguiente formato por cada interfaz que se quiere conectar:
+        [{name: nombre, interface: interfaz},{name: nombre, interface: interfaz}]
 Para un router:
     "nombre":{
         "machineType": "router",
         "template": template del router,
         "router": tipo de SO del router,
+        "gatawey": ip router salida por defecto
         "interfaces": lista de interfaces con: {"iface": interfaz, "ip": "ip, "netmask": mascarade la red}
         "acls": lista de las acls con: { "list": numero de la lista, "action": accion,"origin": ip origen,
                 "orNetmask": mascara origen,"dest": ip destino,"destNetmask": mascara destino, "protocol": protocolo,
@@ -38,8 +42,7 @@ Para un docker:
         #falta la configuracion del docker.
     }
 
-La lista de conexiones (connection_list) tiene el siguiente formato por cada interfaz que se quiere conectar:
-    [{name: nombre, interface: interfaz},{name: nombre, interface: interfaz}]
+
 
 "vlans": [
       {
