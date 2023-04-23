@@ -25,7 +25,7 @@ def configIp(settings, docker_id):
             - netmask(optional): mascara de la red
             - gateway(optional): router de salida
     :param docker_id: id del docker que se quiere configurar
-    :return:
+    :return: None
     """
 
     docker_connection = connectDocker(docker_id)

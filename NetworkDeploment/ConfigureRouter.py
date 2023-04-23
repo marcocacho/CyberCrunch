@@ -5,45 +5,25 @@ Este libreria de funciones consiste en la configuracion de routers a traves de t
 
 Actualmente se ha provado en routers cisco, generando la automatizacion funcional para este tipo de dispositivos.
 """
-"""
-Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
-
-Parametros de entrada:
-    + router: tipo de router (validado para routers cisco)
-    + port: puerto que esta abierto para realizar la conexion
-devuelve:
-    + device: conector al router
-Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro host, si se quiere conectar al router 
-directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir 
-claves que no son necesarios para este modo.
-"""
 
 
 def connectRouter(router, port):
+    """
+    Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
+    :param router: tipo de router (validado para routers cisco)
+    :param port: puerto que esta abierto para realizar la conexion
+    :return: conector al router
+
+Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro host, si se quiere conectar al router
+directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir
+claves que no son necesarios para este modo.
+    """
     device: BaseConnection = ConnectHandler(
         device_type="%s_telnet" % router,  # para router cisco tiene que contener cisco_ios
         host="127.0.0.1",
         port=port
     )
     return device
-
-
-"""
-Configura ip's de un router a traves de telnet
-
-Parametros de entrada:
-    + settings: diccionario con los datos de configuracion del router
-        claves:
-            - router: tipo de router que se va configurar
-            - port: puerto donde se va a relaziar la conexion telnet
-            - interfaces: lista interface o interfaces que se van a configurar
-                claves de cada interface:
-                    * iface: interfaz del router (formatos validos fa 0/0 y fast ethernet 0/0)
-                    * ip: ip de la interfaz router
-                    * netmask: mascara de la ip
-                    * nat(optional): nateo de la interfaz (inside o outside) (no necesario)
-
-"""
 
 
 def confIp(settings):
@@ -87,10 +67,11 @@ def confIp(settings):
         output = device.send_config_set(config_iface)
     device.disconnect()
 
-"""
-Configura el enrutamiento de un router dado
-Parametros de entrada:
-    + settings: diccionario con los datos de configuracion del router
+
+def confRoute(settings):
+    """
+    Configura el enrutamiento de un router dado
+    :param settings:diccionario con los datos de configuracion del router
         claves:
             - router: tipo de router que se va configurar
             - port: puerto donde se va a relaziar la conexion telnet
@@ -103,10 +84,8 @@ Parametros de entrada:
                 claves de las rutas rip:
                     * version: version del protocolo rip
                     * networks: lista de redes que alcanza el router
-"""
-
-
-def confRoute(settings):
+    :return: None
+    """
     device = connectRouter(settings['router'], settings['port'])
 
     config_route = []
@@ -128,10 +107,10 @@ def confRoute(settings):
     device.disconnect()
 
 
-"""
-Configura las acl de un router dado y las aplica en las interfaces
-Parametros de entrada:
-    + settings: diccionario con los datos de configuracion del router
+def confAcl(settings):
+    """
+    Configura las acl de un router dado y las aplica en las interfaces
+    :param settings:  diccionario con los datos de configuracion del router
         claves:
             - router: tipo de router que se va configurar
             - port: puerto donde se va a relaziar la conexion telnet
@@ -139,7 +118,7 @@ Parametros de entrada:
                 claves de las acls:
                     * list: lista a la que pertenece la acl
                     * action: accion que se va a aplicar a la acl
-                    * origin: ip de origen 
+                    * origin: ip de origen
                     * orNetmask(optional): mascara de red de la ip de origen
                     * dest(optional): ip de destino
                     * destNetmask(optional): ascara de red de la ip de destino
@@ -153,13 +132,12 @@ Parametros de entrada:
                     claves de las listAcl:
                         % list: lista que se quiere aplicar
                         % action: con que tipo de paquetes aplicar
+    :return: None
+
 nota: Si se quiere añadir una sentencia final a una lista de acl para permit o deny any se tendra que añadir dentro de la lista
     de las acls al final de la lista.
 nota**: gt = greater than, lt = lesser than, eq = equal
-"""
-
-
-def confAcl(settings):
+    """
     device = connectRouter(settings['router'], settings['port'])
 
     config_acl = []
@@ -215,6 +193,7 @@ def saveConfiguration(router, port):
 
     device.disconnect()
 
+
 def confNateo(router, port, iface):
     """
     Configura el nodo conectado a el nat para permitir conexiones del resto de nodos
@@ -230,6 +209,8 @@ def confNateo(router, port, iface):
     device.send_config_set()
 
     device.disconnect()
+
+
 if __name__ == '__main__':
     interface = [{'iface': 'fa0/0',
                   'ip': '10.0.0.1',

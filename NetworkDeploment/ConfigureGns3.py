@@ -1,5 +1,6 @@
-from gns3fy import Gns3Connector, Project, Node, Link
 import time
+
+from gns3fy import Gns3Connector, Project, Link
 
 """
 Esta libreria de funciones consiste en la creacion y  cracion de los proyectos en GNS3.
@@ -39,6 +40,7 @@ def addNode(name, lab, node):
     node = lab.get_node(name)
     return node.console
 
+
 def createLinks(lab, server, node1, node2):
     """
     Crea un enlace entre dos interfaces de dos nodos del proyecto
@@ -52,7 +54,7 @@ def createLinks(lab, server, node1, node2):
      + name: nombre del nodo:
      + interface: interfaz que se quiere usar para conectar (vala nombre corto y largo)
     """
-    #Se busca el numero del adaptador al que pertenece la interfaz para ambos nodos
+    # Se busca el numero del adaptador al que pertenece la interfaz para ambos nodos
     for port in lab.get_node(node1['name']).ports:
         if port['name'] == node1['interface'] or port['short_name'] == node1['interface']:
             adapter_node1 = port['adapter_number']
@@ -64,14 +66,15 @@ def createLinks(lab, server, node1, node2):
             adapter_node2 = port['adapter_number']
             port_number2 = port['port_number']
             break
-    #lista con los nodos ha conectar
+    # lista con los nodos ha conectar
     nodes = [
         dict(node_id=lab.get_node(node1['name']).node_id, adapter_number=adapter_node1, port_number=port_number1),
         dict(node_id=lab.get_node(node2['name']).node_id, adapter_number=adapter_node2, port_number=port_number2)]
 
-    #Se crea el enlace entre los nodos
+    # Se crea el enlace entre los nodos
     link = Link(project_id=lab.project_id, connector=server, nodes=nodes)
     link.create()
+
 
 def getDockerId(name, lab):
     """
@@ -82,6 +85,7 @@ def getDockerId(name, lab):
     """
     node = lab.get_node(name)
     return node.properties["container_id"]
+
 
 def manageMachines(name, lab, action):
     """
@@ -107,16 +111,14 @@ def manageMachines(name, lab, action):
         print("No existe el nodo seleccionado")
 
 
-
-
-#Se puede añadir una nueva funcion para añdir maquinas odockers, ejemplo para virtualbox en prueba Gns3
+# Se puede añadir una nueva funcion para añdir maquinas odockers, ejemplo para virtualbox en prueba Gns3
 
 if __name__ == '__main__':
     # Inicializamos la API de GNS3
     gns3_server = Gns3Connector(url="http://127.0.0.1:3080")
     lab: Project = openProject(gns3_server, "test_lab")
     node1 = {"name": "R2",
-          "interface": "FastEthernet0/0"}
+             "interface": "FastEthernet0/0"}
     node2 = {'name': 'S2',
              'interface': 'Gi0/0'}
     createLinks(lab, gns3_server, node1, node2)

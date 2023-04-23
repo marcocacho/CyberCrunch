@@ -1,8 +1,10 @@
-from NetworkDeploment.ConfigureRouter import connectRouter
-from NetworkDeploment.ConfigureSwitch import connectSwitch
+import re
+
 from NetworkDeploment.ConfigureDocker import connectDocker
 from NetworkDeploment.ConfigureGns3 import getDockerId
-import re
+from NetworkDeploment.ConfigureRouter import connectRouter
+from NetworkDeploment.ConfigureSwitch import connectSwitch
+
 
 def getLinkData(links_global, lab, name):
     """
@@ -86,6 +88,8 @@ def getVlanSwitch(lab, name):
             vlans[vlan_id] = interfaces
 
     return vlans
+
+
 def getGatewayLinux(lab, name):
     """
     Consulta la Ip del gateway de un dispositivo linux
@@ -102,6 +106,7 @@ def getGatewayLinux(lab, name):
     else:
         return None
 
+
 def getIpLinux(lab, name):
     """
     Consulta la Ip  de un equipo linux
@@ -117,6 +122,8 @@ def getIpLinux(lab, name):
         return gateway_match.group(1)
     else:
         return None
+
+
 def getInfoRouter(name, lab):
     """
     Solicta informacion considerada importante de un router
@@ -154,6 +161,6 @@ def getInfoLinux(name, lab):
     """
     node = lab.get_node(name)
     data = {"name": name, "type": "Linux", "links": getLinkData(lab.links, lab, name),
-            "ip": getIpLinux(lab, name),"gateway": getGatewayLinux(lab, name), "status": node.status}
+            "ip": getIpLinux(lab, name), "gateway": getGatewayLinux(lab, name), "status": node.status}
 
     return data
