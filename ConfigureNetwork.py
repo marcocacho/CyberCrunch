@@ -43,6 +43,7 @@ def readJson(file):
     for deviceName in hilos:
         if not deviceName == "connection_list":
             hilos[deviceName].join()
+    #añadir aqui la cracion del nat
     hilos["connection_list"].start()
     hilos["connection_list"].join()
     print(f"Red {lab_name} creada y configura")
@@ -58,6 +59,7 @@ def configureRouter(lab, name, settings):
     :return: None
     """
     port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
+    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
     time.sleep(30) # tiempo de espera a que se encienda el equipo
     if "interfaces" in settings:
         config_ip = {"router": settings["router"], "port": port, "interfaces": settings["interfaces"]}
@@ -70,6 +72,7 @@ def configureRouter(lab, name, settings):
         config_acl = {"router": settings["router"], "port": port, "acls": settings["acls"],
                       "interfaces_acl": settings["interfaces_acl"]}
         NetworkDeploment.ConfigureRouter.confAcl(config_acl)
+    NetworkDeploment.ConfigureRouter.saveConfiguration(settings["router"], port)
 
     print(f"{name} creado y configurado")
 
@@ -82,11 +85,13 @@ def configureSwitch(lab, name, settings):
     :return: None
     """
     port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
+    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
     time.sleep(60) # tiempo de espera a que se encienda el equipo
     if "vlans" in settings:
-        NetworkDeploment.ConfigureSwitch.enableTerminal(settings["switch"], port)
+        #NetworkDeploment.ConfigureSwitch.enableTerminal(settings["switch"], port)
         config_vlan = {"switch": settings["switch"], "port": port, "vlans": settings["vlans"]}
         NetworkDeploment.ConfigureSwitch.confVlan(config_vlan)
+    NetworkDeploment.ConfigureRouter.saveConfiguration(settings["switch"], port)
     print(f"{name} creado y configurado")
 
 def configureDocker(lab, name, settings):
@@ -98,6 +103,7 @@ def configureDocker(lab, name, settings):
     :return: None
     """
     port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
+    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
     docker_id = NetworkDeploment.ConfigureGns3.getDockerId(name, lab)
     NetworkDeploment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
                                                "netmask": settings["netmask"],"gateway": settings["gateway"]},
@@ -114,5 +120,23 @@ def connectNodes(lab, server, conection_list):
     for nodos in conection_list:
         NetworkDeploment.ConfigureGns3.createLinks(lab, server, nodos[0], nodos[1])
     print ("Nodos conectados")
+
+def configureNat(lab, name, settings):
+    """
+    Conecta un router con el nodo nat, y configura la acl-list para el envio de paquetes
+    :param lab: laboratorio de gns3 abierto
+    :param name: nombre que se le va a otorgar al nodo
+    :param settings: diicionario con los datos a configurar con el formato descrito en LaboratoryFormat.txt
+    :return: None
+    """
+    #Se añade el nodo nat aqui
+    #Se necesita poner la interfaz del router en dhcp (ip address dhcp), nateo del router para outside(ip nat outside)
+    #se necesita poner las interfaces que no son del nat con nat inside (ip nat inside)
+    #Se tiene que configurar la acceslist (por ahora ip nat inside source list 1 interface fastEthernet 2/0 overload y access-list 1 permit any)
+    #no necesario poner ip domain-server 8.8.8.8 y ip domain-lookup
+    #resto de router añadir ruta por defecto con el mas cercano al nodo con nat (ip route 0.0.0.0 0.0.0.0 ip)
+
+
+
 if __name__ == "__main__":
     readJson("redPrueba.json")

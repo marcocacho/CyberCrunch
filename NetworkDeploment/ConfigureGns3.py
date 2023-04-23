@@ -35,7 +35,6 @@ def addNode(name, lab, node):
     """
     lab.create_node(name=name, template=node)
     node = lab.get_node(name)
-    node.start()
     return node.console
 
 def createLinks(lab, server, node1, node2):
@@ -103,6 +102,9 @@ def manageMachines(name, lab, action):
     else:
         print("No existe el nodo seleccionado")
 
+
+
+
 #Se puede añadir una nueva funcion para añdir maquinas odockers, ejemplo para virtualbox en prueba Gns3
 
 if __name__ == '__main__':
@@ -114,5 +116,3 @@ if __name__ == '__main__':
     node2 = {'name': 'S2',
              'interface': 'Gi0/0'}
     createLinks(lab, gns3_server, node1, node2)
-    for template in gns3_server.get_templates():
-        print(f"Template: {template['name']} -- ID: {template['template_id']}")

@@ -82,6 +82,7 @@ def confIp(settings):
                     config_iface.append('ip nat %s' % nat)
 
         output = device.send_config_set(config_iface)
+        device.disconnect()
 
 
 """
@@ -122,6 +123,7 @@ def confRoute(settings):
         for area in settings['routes']:
             config_route.append("network %s %s area %s" % (area["ip"], area["wilcard"], area["area"]))
     output = device.send_config_set(config_route)
+    device.disconnect()
 
 
 """
@@ -192,7 +194,24 @@ def confAcl(settings):
         for listAcl in interface['list_acl']:
             apply_acl.append('ip access-group %s %s' % (listAcl['list'], listAcl['action']))
         output = device.send_config_set(apply_acl)
+    device.disconnect()
 
+
+def saveConfiguration(router, port):
+    """
+    Guarda la configuracion para el arranque del equipo
+    :param router: tipo de SO del router
+    :param port: puerto por el que se va a conectar
+    :return: None
+    """
+    device = connectRouter(router, port)
+    output = device.send_command_timing('copy running-config startup-config')
+    if "Address or name" in output:
+        output += device.send_command_timing("\n")
+    if "Destination filename" in output:
+        output += device.send_command_timing("\n")
+
+    device.disconnect()
 
 if __name__ == '__main__':
     interface = [{'iface': 'fa0/0',

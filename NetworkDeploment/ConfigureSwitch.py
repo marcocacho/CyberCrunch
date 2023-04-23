@@ -55,7 +55,7 @@ nota: numbre: trunk -> se considera que se esta selecionando el modo trunk para 
 """
 def confVlan(settings):
     device = connectSwitch(settings['switch'], settings['port'])
-
+    device.enable()
     for vlan in settings['vlans']:
         config_vlan = []
         if vlan['number']=='trunk':
