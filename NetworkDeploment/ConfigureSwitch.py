@@ -25,19 +25,6 @@ def connectSwitch(switch, port):
     )
     return device
 
-def enableTerminal(switch, port):
-    """
-    Activa la terminal para poder configurar el switch
-    :param switch: tipo de switch (validado para switch proporcionado por gns3)
-    :param port: puerto que esta abierto para realizar la conexion
-    :return:
-    """
-    try: # hablita la terminal para poder enviar la configuracion
-        device = connectSwitch(switch, port)
-        device.send_command('enable')
-    except: # la ejecucion del codigo enable devuelve un error conocido que es controlado y no influye en el proceso del programa
-        pass
-
 """
 Configura las vlans de un switch dado y las aplica en las interfaces
 Parametros de entrada:
@@ -73,6 +60,7 @@ def confVlan(settings):
                 config_vlan.append('switchport access vlan %s' % vlan['number'])
                 config_vlan.append('no shutdown')
         output = device.send_config_set(config_vlan)
+        device.disconnect()
 
 
 if __name__ == '__main__':

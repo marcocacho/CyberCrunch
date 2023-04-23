@@ -4,6 +4,10 @@ Para un laboratorio:
     "labDesc": string
     "labManageNet": ip
     "logServer": ip
+    "nat": {
+        "router": name,
+        "iface": interfaz del router reservada para el nat
+        }
     "components": -> si se trata de un nombre de un nodo se van a diferenciar 3 posibles nodos distintos: router, switch o docker
 Para un router:
     "nombre":{

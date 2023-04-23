@@ -74,7 +74,10 @@ def confIp(settings):
             config_iface.append('no shutdown')
         else:
             config_iface.append('interface %s' % interface['iface'])
-            config_iface.append('ip address %s %s' % (interface['ip'], interface['netmask']))
+            if "ip" in interface:
+                config_iface.append('ip address %s %s' % (interface['ip'], interface['netmask']))
+            else:
+                config_iface.append('ip address dhcp')
             config_iface.append('no shutdown')
             if 'nat' in interface:
                 nat = interface['nat']

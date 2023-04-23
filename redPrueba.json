@@ -1,186 +1,188 @@
 {
-  "R1": {
-    "machineType": "router",
-    "template": "c7200",
-    "router": "cisco_ios",
-    "interfaces": [
-      {
-        "iface": "fa0/0",
-        "ip": "192.168.0.1",
-        "netmask": "255.255.255.0"
-      },
-      {
-        "iface": "fa1/0",
-        "ip": "192.168.1.1",
-        "netmask": "255.255.255.0",
-        "nat": "inside"
-      }
-    ],
-    "type": "ospf",
-    "routes": [
-      {
-        "ip": "192.168.1.0",
-        "wilcard": "0.0.0.255",
-        "area": "1"
-      },
-      {
-        "ip": "192.168.0.0",
-        "wilcard": "0.0.0.255",
-        "area": "1"
-      }
+  "labName": "redPrueba",
+  "nat": {
+    "router": "R1",
+    "iface": "fa0/1"
+  },
+  "components": {
+    "R1": {
+      "machineType": "router",
+      "template": "c7200",
+      "router": "cisco_ios",
+      "interfaces": [
+        {
+          "iface": "fa0/0",
+          "ip": "192.168.0.1",
+          "netmask": "255.255.255.0"
+        },
+        {
+          "iface": "fa1/0",
+          "ip": "192.168.1.1",
+          "netmask": "255.255.255.0",
+          "nat": "inside"
+        }
+      ],
+      "type": "ospf",
+      "routes": [
+        {
+          "ip": "192.168.1.0",
+          "wilcard": "0.0.0.255",
+          "area": "1"
+        },
+        {
+          "ip": "192.168.0.0",
+          "wilcard": "0.0.0.255",
+          "area": "1"
+        }
+      ]
+    },
+    "R2": {
+      "machineType": "router",
+      "template": "c7200",
+      "router": "cisco_ios",
+      "interfaces": [
+        {
+          "iface": "fa0/0",
+          "ip": "192.168.0.2",
+          "netmask": "255.255.255.0"
+        },
+        {
+          "iface": "fa1/0",
+          "ip": "192.168.10.1",
+          "netmask": "255.255.255.0",
+          "nat": "inside",
+          "vlan": "10"
+        },
+        {
+          "iface": "fa1/0",
+          "ip": "192.168.20.1",
+          "netmask": "255.255.255.0",
+          "nat": "inside",
+          "vlan": "20"
+        }
+      ],
+      "type": "ospf",
+      "routes": [
+        {
+          "ip": "192.168.10.0",
+          "wilcard": "0.0.0.255",
+          "area": "1"
+        },
+        {
+          "ip": "192.168.20.0",
+          "wilcard": "0.0.0.255",
+          "area": "1"
+        },
+        {
+          "ip": "192.168.0.0",
+          "wilcard": "0.0.0.255",
+          "area": "1"
+        }
+      ]
+    },
+    "S1": {
+      "machineType": "switch",
+      "template": "Cisco IOSvL2 15.2(4.0.55)E",
+      "switch": "cisco_ios",
+      "vlans": [
+        {
+          "number": "trunk",
+          "interfaces": [
+            "Gi 0/0"
+          ]
+        },
+        {
+          "number": "10",
+          "name": "Vlan 10",
+          "interfaces": [
+            "Gi 1/0"
+          ]
+        },
+        {
+          "number": "20",
+          "name": "Vlan 20",
+          "interfaces": [
+            "Gi 2/0"
+          ]
+        }
+      ]
+    },
+    "Alumno": {
+      "machineType": "docker",
+      "template": "Ubuntu Docker Guest",
+      "iface": "eth0",
+      "ip": "192.168.1.2",
+      "netmask": "255.255.255.0",
+      "gateway": "192.168.1.1"
+    },
+    "D1": {
+      "machineType": "docker",
+      "template": "Ubuntu Docker Guest",
+      "iface": "eth0",
+      "ip": "192.168.10.2",
+      "netmask": "255.255.255.0",
+      "gateway": "192.168.10.1"
+    },
+    "D2": {
+      "machineType": "docker",
+      "template": "Ubuntu Docker Guest",
+      "iface": "eth0",
+      "ip": "192.168.20.2",
+      "netmask": "255.255.255.0",
+      "gateway": "192.168.20.1"
+    },
+    "connection_list": [
+      [
+        {
+          "name": "R1",
+          "interface": "FastEthernet0/0"
+        },
+        {
+          "name": "R2",
+          "interface": "f0/0"
+        }
+      ],
+      [
+        {
+          "name": "R2",
+          "interface": "FastEthernet1/0"
+        },
+        {
+          "name": "S1",
+          "interface": "Gi0/0"
+        }
+      ],
+      [
+        {
+          "name": "D2",
+          "interface": "eth0"
+        },
+        {
+          "name": "S1",
+          "interface": "Gi2/0"
+        }
+      ],
+      [
+        {
+          "name": "D1",
+          "interface": "eth0"
+        },
+        {
+          "name": "S1",
+          "interface": "Gi1/0"
+        }
+      ],
+      [
+        {
+          "name": "R1",
+          "interface": "f1/0"
+        },
+        {
+          "name": "Alumno",
+          "interface": "eth0"
+        }
+      ]
     ]
-  },
-  "R2": {
-    "machineType": "router",
-    "template": "c7200",
-    "router": "cisco_ios",
-    "interfaces": [
-      {
-        "iface": "fa0/0",
-        "ip": "192.168.0.2",
-        "netmask": "255.255.255.0"
-      },
-      {
-        "iface": "fa1/0",
-        "ip": "192.168.10.1",
-        "netmask": "255.255.255.0",
-        "nat": "inside",
-        "vlan": "10"
-      },
-      {
-        "iface": "fa1/0",
-        "ip": "192.168.20.1",
-        "netmask": "255.255.255.0",
-        "nat": "inside",
-        "vlan": "20"
-      }
-    ],
-    "type": "ospf",
-    "routes": [
-      {
-        "ip": "192.168.0.0",
-        "wilcard": "0.0.0.255",
-        "area": "1"
-      },
-      {
-        "ip": "192.168.10.0",
-        "wilcard": "0.0.0.255",
-        "area": "1"
-      },
-      {
-        "ip": "192.168.20.0",
-        "wilcard": "0.0.0.255",
-        "area": "1"
-      },
-      {
-        "ip": "192.168.0.0",
-        "wilcard": "0.0.0.255",
-        "area": "1"
-      }
-    ]
-  },
-  "S1": {
-    "machineType": "switch",
-    "template": "Cisco IOSvL2 15.2(4.0.55)E",
-    "switch": "cisco_ios",
-    "vlans": [
-      {
-        "number": "trunk",
-        "interfaces": [
-          "Gi 0/0"
-        ]
-      },
-      {
-        "number": "10",
-        "name": "Vlan 10",
-        "interfaces": [
-          "Gi 1/0"
-        ]
-      },
-      {
-        "number": "20",
-        "name": "Vlan 20",
-        "interfaces": [
-          "Gi 2/0"
-        ]
-      }
-    ]
-  },
-  "Alumno": {
-    "machineType": "docker",
-    "template": "Ubuntu Docker Guest",
-    "iface": "eth0",
-    "ip": "192.168.1.2",
-    "netmask": "255.255.255.0",
-    "gateway": "192.168.1.1"
-  },
-  "D1": {
-    "machineType": "docker",
-    "template": "Ubuntu Docker Guest",
-    "iface": "eth0",
-    "ip": "192.168.10.2",
-    "netmask": "255.255.255.0",
-    "gateway": "192.168.10.1"
-  },
-  "D2": {
-    "machineType": "docker",
-    "template": "Ubuntu Docker Guest",
-    "iface": "eth0",
-    "ip": "192.168.20.2",
-    "netmask": "255.255.255.0",
-    "gateway": "192.168.20.1"
-  },
-  "connection_list": [
-    [
-      {
-        "name": "R1",
-        "interface": "FastEthernet0/0"
-      },
-      {
-        "name": "R2",
-        "interface": "f0/0"
-      }
-    ],
-    [
-      {
-        "name": "R2",
-        "interface": "FastEthernet1/0"
-      },
-      {
-        "name": "S1",
-        "interface": "Gi0/0"
-      }
-    ],
-    [
-      {
-        "name": "D2",
-        "interface": "eth0"
-      },
-      {
-        "name": "S1",
-        "interface": "Gi2/0"
-      }
-    ],
-    [
-      {
-        "name": "D1",
-        "interface": "eth0"
-      },
-      {
-        "name": "S1",
-        "interface": "Gi1/0"
-      }
-    ],
-    [
-      {
-        "name": "R1",
-        "interface": "f1/0"
-      },
-      {
-        "name": "Alumno",
-        "interface": "eth0"
-      }
-    ]
-  ]
+  }
 }
 

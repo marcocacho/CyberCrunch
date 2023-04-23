@@ -1,4 +1,5 @@
 from gns3fy import Gns3Connector, Project, Node, Link
+import time
 
 """
 Esta libreria de funciones consiste en la creacion y  cracion de los proyectos en GNS3.
@@ -34,6 +35,7 @@ def addNode(name, lab, node):
     :return: puerto donde se abrio la consola
     """
     lab.create_node(name=name, template=node)
+    time.sleep(1)
     node = lab.get_node(name)
     return node.console
 

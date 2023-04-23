@@ -19,10 +19,14 @@ def readJson(file):
     f = open(file, "r")
     network = json.load(f)
     gns3_server = Gns3Connector(url="http://127.0.0.1:3080")
-    lab_name = file.replace(".json", "")
+    lab_name = network["labName"]
     lab: Project = NetworkDeploment.ConfigureGns3.openProject(gns3_server, lab_name)
-    for deviceName in network:
-        settings = network[deviceName]
+    if "nat" in network:
+        nat = network["nat"]
+        for iface in network["components"][nat["router"]]["interfaces"]:
+            iface["nat"] = "inside"
+        network["components"][nat["router"]]["interfaces"].append({"iface": nat["iface"], "nat": "outside"})
+    for deviceName, settings in network["components"].items():
         if deviceName == "connection_list":  # apartado de crear las conexiones entre maquinas
             hilos[deviceName] = threading.Thread(name=deviceName, target=connectNodes,
                                                  args=(lab, gns3_server, settings))
