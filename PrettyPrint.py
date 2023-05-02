@@ -42,7 +42,7 @@ def prettySwitchInfo(dictionary):
         for vlan in dictionary['vlans']:
             if link['interface'] in dictionary['vlans'][vlan]:
                 vlan_name = vlan
-                exit
+                break
         print("{:<20} {:<20} {:<20} {:<20}".format(link['interface'], vlan_name, link['destinationName'],
                                                    link['destinationInterface']))
 
