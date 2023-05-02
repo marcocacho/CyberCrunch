@@ -77,12 +77,13 @@ def configSyslog(docker_id, ip_opensearch, port_opensearh, lab_name, settings=[]
 }};'''
     docker_connection = connectDocker(docker_id)
     code, result = docker_connection.exec_run(f'''mkdir -p {syslog_route}''')
-    print(f'''echo '{destination}' >> {syslog_route}/{conf_file}''')
-    code, result = docker_connection.exec_run(f'''echo '{destination}' >> {syslog_route}/{conf_file}''')
+    command = f'''echo '{destination}' >> {syslog_route}/{conf_file}'''
+    print(command)
+    code, result = docker_connection.execute(command)
     print(code)
     print(result)
     for data in settings:
-        code, result = docker_connection.exec_run(f'''echo '{source.format(data['name'], data['type'], data['log'])}' >> {syslog_route}/{conf_file}''')
+        code, result = docker_connection.exec_run(f"""echo '{source.format(data['name'], data['type'], data['log'])}' >> {syslog_route}/{conf_file}""")
         code, result = docker_connection.exec_run(f'''echo '{log.format('s_'+data['name'])}' >> {syslog_route}/{conf_file}''')
 
 
