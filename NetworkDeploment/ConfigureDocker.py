@@ -5,13 +5,18 @@ Libreria de funciones para configurar un docker activo
 """
 
 
-def connectDocker(id):
+def connectDocker(id, ip=None, port=2376):
     """
     Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
     :param id: id del docker al que se quiere conectar
+    :param ip: ip del equipo donde se esta ejecutnado docker
+    :param port: puerto donde se esta escuchando, por defecto el 2376
     :return: conector al docker
     """
-    client = docker.from_env()
+    if ip != None:
+        client = docker.DockerClient(base_url=f'tcp://{ip}:{port}', tls=False)
+    else:
+        client = docker.from_env()
     return client.containers.get(id)
 
 
