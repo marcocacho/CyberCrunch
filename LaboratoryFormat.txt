@@ -2,13 +2,27 @@ Json compuesto de nombres de los elemetos o la lista de conexiones.
 Para un laboratorio:
     "labName": name
     "labDesc": string
-    "labManageNet": ip
+    "GNS3": { datos del servidor gns3
+        "ip": ip del servidor de gns3,
+        "port": puerto abierto del servidor de gns3,
+        "User": usuario, sino hay usuario o contraseña se tendra que dejar como ""
+        "pass": contraseña,
+    },
+    "docker":{ datos de la maquina donde se virtualiza docker
+        "ip": ip de la maquina para virtualzar docker
+        "port": puerto del virtualizador
+        "compute_id": id de la maquina para crear los dockers
+    },
+    "openSearch":{
+        "ip": ip de la maquina donde se almacenan los logs
+        "port": puerto de la maquina abierto
+    },
     "logServer": ip
     "nat": {
         "router": name,
         "iface": interfaz del router reservada para el nat
         "nat": interfaz del nat
-        }
+    }
     "components": -> si se trata de un nombre de un nodo se van a diferenciar 3 posibles nodos distintos: router, switch o docker
     "connection_list": Lista de conexiones con el siguiente formato por cada interfaz que se quiere conectar:
         [{name: nombre, interface: interfaz},{name: nombre, interface: interfaz}]

@@ -1,5 +1,11 @@
 {
   "labName": "redPrueba",
+  "gns3": {
+    "ipGns3Server": "10.0.49.2",
+    "portGns3Server": "80",
+    "UserGns3Server": "admin",
+    "passGns3Server": "Gns32mil23."
+  },
   "nat": {
     "router": "R1",
     "iface": "f0/1",

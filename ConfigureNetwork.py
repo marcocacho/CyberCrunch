@@ -21,7 +21,9 @@ def readJson(file):
     hilos = {}  # dicionario con los hilos creados
     f = open(file, "r")
     network = json.load(f)
-    gns3_server = Gns3Connector(url="http://127.0.0.1:3080") #http://10.0.49.2 ip del lab de
+    gns3 = network["gns3"] #10.0.49.2 ip interna de equipo
+    gns3_server = Gns3Connector(url=f"http://{gns3['ip']}:{gns3['port']}",
+                                user=gns3["user"], cred=gns3["pass"])
     lab_name = network["labName"]
     lab: Project = NetworkDeploment.ConfigureGns3.openProject(gns3_server, lab_name)
     if "nat" in network:
