@@ -8,11 +8,13 @@ Para un laboratorio:
         "User": usuario, sino hay usuario o contraseña se tendra que dejar como ""
         "pass": contraseña,
     },
-    "docker":{ datos de la maquina donde se virtualiza docker
-        "ip": ip de la maquina para virtualzar docker
-        "port": puerto del virtualizador
-        "compute_id": id de la maquina para crear los dockers
-    },
+    "esclavos":[ lista de esclavos
+        "name":{ nombre del esclavo
+            "ip": ip de la maquina para virtualzar docker
+            "port": puerto del virtualizador
+            "compute_id": id de la maquina para crear los dockers
+        }
+    ],
     "openSearch":{
         "ip": ip de la maquina donde se almacenan los logs
         "port": puerto de la maquina abierto
@@ -27,7 +29,8 @@ Para un laboratorio:
     "connection_list": Lista de conexiones con el siguiente formato por cada interfaz que se quiere conectar:
         [{name: nombre, interface: interfaz},{name: nombre, interface: interfaz}]
 Para un router:
-    "nombre":{
+    "name":{ nombre del router
+        "nodo": nombre del host esclavo
         "machineType": "router",
         "template": template del router,
         "router": tipo de SO del router,
@@ -38,10 +41,12 @@ Para un router:
                     "protocol": protocolo por nombre o numero},
         "interfaces_acl": lista de las acl y donde se aplican con:{ "interface": interfaz, "list_acl": lista con las acl:
             {"list": numero de la lista,"action": cuando se aplica}
+
     }
 
 Para un switch:
-     "nombre":{
+     "name":{ nombre del switch
+        "nodo": nombre del host esclavo
         "machineType": "switch",
         "template": template del switch,
         "switch": tipo de SO del switch,
@@ -50,14 +55,14 @@ Para un switch:
      }
 
 Para un docker:
-    "nombre":{
+    "name":{nombre del docker
+        "nodo": nombre del host esclavo
         "machineType": "docker",
         "template": template del docker,
         #falta la configuracion del docker.
     }
 
-
-
+No se que representa esto a dia 13/05/2023
 "vlans": [
       {
         "number": "trunk",
