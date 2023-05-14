@@ -1,5 +1,5 @@
 from netmiko import ConnectHandler, BaseConnection
-
+import time
 """
 Este libreria de funciones consiste en la configuracion de routers a traves de telnet.
 
@@ -7,10 +7,11 @@ Actualmente se ha provado en routers cisco, generando la automatizacion funciona
 """
 
 
-def connectRouter(router, port):
+def connectRouter(router, ip, port):
     """
     Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
     :param router: tipo de router (validado para routers cisco)
+    :param ip: ip del nodo en el que vamos a virtualizar el router
     :param port: puerto que esta abierto para realizar la conexion
     :return: conector al router
 
@@ -18,11 +19,19 @@ Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro 
 directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir
 claves que no son necesarios para este modo.
     """
-    device: BaseConnection = ConnectHandler(
-        device_type="%s_telnet" % router,  # para router cisco tiene que contener cisco_ios
-        host="127.0.0.1",
-        port=port
-    )
+    connected = False
+    while not connected:  # por si tarda mas en encenderse del tiempo esperado
+        try:
+            device: BaseConnection = ConnectHandler(
+                device_type="%s_telnet" % router,  # para switch cisco tiene que contener cisco_ios
+                host=ip,
+                port=port
+            )
+            connected = True
+        except Exception as e:
+            print("Error de conexión:", str(e))
+            print("Reintentando la conexión en 5 segundos...")
+            time.sleep(5)
     return device
 
 
@@ -41,7 +50,7 @@ def confIp(settings):
                     * nat(optional): nateo de la interfaz (inside o outside) (no necesario)
     :return: None
     """
-    device = connectRouter(settings['router'], settings['port'])
+    device = connectRouter(settings['router'], settings['console_ip'], settings['console_port'])
     for interface in settings['interfaces']:
         config_iface = []
         if "vlan" in interface:
@@ -86,7 +95,7 @@ def confRoute(settings):
                     * networks: lista de redes que alcanza el router
     :return: None
     """
-    device = connectRouter(settings['router'], settings['port'])
+    device = connectRouter(settings['router'], settings['console_ip'], settings['console_port'])
 
     config_route = []
     if settings['type'] == 'static':  # si el tipo de enrutamiento es estatico.
@@ -138,7 +147,7 @@ nota: Si se quiere añadir una sentencia final a una lista de acl para permit o 
     de las acls al final de la lista.
 nota**: gt = greater than, lt = lesser than, eq = equal
     """
-    device = connectRouter(settings['router'], settings['port'])
+    device = connectRouter(settings['router'], settings['console_ip'], settings['console_port'])
 
     config_acl = []
     for acl in settings['acls']:
@@ -169,22 +178,22 @@ nota**: gt = greater than, lt = lesser than, eq = equal
         config_acl.append(sentence)
     output = device.send_config_set(config_acl)
     for interface in settings['interfaces_acl']:
-        apply_acl = []
-        apply_acl.append('interface %s ' % interface['interface'])
+        apply_acl = ['interface %s ' % interface['interface']]
         for listAcl in interface['list_acl']:
             apply_acl.append('ip access-group %s %s' % (listAcl['list'], listAcl['action']))
         output = device.send_config_set(apply_acl)
     device.disconnect()
 
 
-def saveConfiguration(router, port):
+def saveConfiguration(router, console_ip, console_port):
     """
     Guarda la configuracion para el arranque del equipo
     :param router: tipo de SO del router
-    :param port: puerto por el que se va a conectar
+    :param console_ip: ip del servidor gns3
+    :param console_port: puerto por el que se va a conectar
     :return: None
     """
-    device = connectRouter(router, port)
+    device = connectRouter(router, console_ip, console_port)
     output = device.send_command_timing('copy running-config startup-config')
     if "Address or name" in output:
         output += device.send_command_timing("\n")
@@ -194,89 +203,19 @@ def saveConfiguration(router, port):
     device.disconnect()
 
 
-def confNateo(router, port, iface):
+def confNateo(router, console_ip, console_port, iface):
     """
     Configura el nodo conectado a el nat para permitir conexiones del resto de nodos
     :param router: tipo de SO del router
-    :param port: puerto por el que se va a conectar
+    :param console_ip: ip del servidor gns3
+    :param console_port: puerto por el que se va a conectar
     :param iface: Interfaz por la que se conecta el nat
     :return: None
     """
-    device = connectRouter(router, port)
+    device = connectRouter(router, console_ip, console_port)
     comands = ["ip nat inside source list 1 interface %s overload" % iface,
                "access-list 1 permit any"]
     output = device.send_config_set(comands)
     device.send_config_set()
 
     device.disconnect()
-
-
-if __name__ == '__main__':
-    interface = [{'iface': 'fa0/0',
-                  'ip': '10.0.0.1',
-                  'netmask': '255.255.255.0'
-                  },
-                 {'iface': 'fa1/0',
-                  'ip': '10.0.1.1',
-                  'netmask': '255.255.255.0',
-                  'nat': 'inside'
-                  },
-                 {'iface': 'fa2/0',
-                  'ip': '10.0.2.1',
-                  'netmask': '255.255.255.0',
-                  'nat': 'asd'
-                  }
-                 ]
-    config_ip = {'router': 'cisco_ios',
-                 'port': '5001',
-                 'interfaces': interface
-                 }
-
-    # confIp(config_ip)
-
-    routes_static = [{'origin': '10.0.0.0',
-                      'orNetmask': '255.255.255.0',
-                      'dest': '10.0.1.2'
-                      },
-                     {'origin': '10.0.1.0',
-                      'orNetmask': '255.255.255.0',
-                      'dest': '10.0.2.2'
-                      }
-                     ]
-    routes_rip = {'version': '2',
-                  'networks': ['10.0.0.0', '10.0.1.0', '10.0.2.0']
-                  }
-    routes_ospf = [{"ip": "192.168.10.0", "wilcard": "0.0.0.255", "area": "1"},
-                   {"ip": "192.168.20.0", "wilcard": "0.0.0.255", "area": "1"},
-                   {"ip": "192.168.0.0", "wilcard": "0.0.0.255", "area": "1"}]
-    config_route = {'router': 'cisco_ios',
-                    'port': '5001',
-                    'type': 'rip',
-                    'routes': routes_rip
-                    }
-    # confRoute(config_route)
-    acl = [{'list': '10',
-            'action': 'permit',
-            'origin': '10.0.1.0',
-            'orNetmask': '255.255.255.0',
-            },
-           {'list': '110',
-            'action': 'deny',
-            'origin': '10.0.2.14',
-            'dest': '10.0.0.0',
-            'destNetmask': '255.255.255.0',
-            'protocol': 'tcp',
-            'port': '25'
-            }
-           ]
-    list_acl = [{'interface': 'fa0/0',
-                 'list_acl': [{'list': '10', 'action': 'out'},
-                              {'list': '110', 'action': 'out'}]
-
-                 }]
-    config_acl = {'router': 'cisco_ios',
-                  'port': '5001',
-                  'acls': acl,
-                  'interfaces_acl': list_acl
-                  }
-    confAcl(config_acl)

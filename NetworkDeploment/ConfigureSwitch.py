@@ -1,4 +1,5 @@
 from netmiko import ConnectHandler, BaseConnection
+import time
 
 """
 Este libreria de funciones consiste en la configuracion de swithces a traves de telnet.
@@ -7,10 +8,11 @@ Actualmente se ha provado en los swithces proporcionados por gns3, generando la 
 """
 
 
-def connectSwitch(switch, port):
+def connectSwitch(switch, ip, port):
     """
     Se conecta a un switch a traves de telnet desplegado en gns3 instalado en la maquina local.
     :param switch: tipo de switch (validado para switch proporcionado por gns3)
+    :param ip: ip del nodo en el que vamos a virtualizar el switch
     :param port: puerto que esta abierto para realizar la conexion
     :return: None
 
@@ -18,11 +20,20 @@ Nota:Se puede apliar esta funcion para otras ips si se parametriza el parametro 
 directamente. Tambien se puede eliminar la palabra telnet y utilizar ssh si se encuentra disponible al igual que añadir
 claves que no son necesarios para este modo.
     """
-    device: BaseConnection = ConnectHandler(
-        device_type="%s_telnet" % switch,  # para switch cisco tiene que contener cisco_ios
-        host="127.0.0.1",
-        port=port
-    )
+    connected = False
+    while not connected:
+        try:
+            device: BaseConnection = ConnectHandler(
+                device_type="%s_telnet" % switch,  # para switch cisco tiene que contener cisco_ios
+                host=ip,
+                port=port
+            )
+            connected = True
+        except Exception as e:
+            print("Error de conexión:", str(e))
+            print("Reintentando la conexión en 5 segundos...")
+            time.sleep(5)
+
     return device
 
 
@@ -41,7 +52,7 @@ def confVlan(settings):
     :return: None
 nota: numbre: trunk -> se considera que se esta selecionando el modo trunk para los puertos esogidos en interfaces
     """
-    device = connectSwitch(settings['switch'], settings['port'])
+    device = connectSwitch(settings['switch'], settings['console_ip'], settings['console_port'])
     device.enable()
     for vlan in settings['vlans']:
         config_vlan = []
@@ -63,22 +74,4 @@ nota: numbre: trunk -> se considera que se esta selecionando el modo trunk para 
     device.disconnect()
 
 
-if __name__ == '__main__':
-    vlans = [{'number': 'trunk',
-              'interfaces': ['Gi 0/0']
-              },
-             {
-                 'number': '10',
-                 'name': 'prueba',
-                 'interfaces': ['Gi 0/1', 'Gi 0/2']
-             },
-             {
-                 'number': '20',
-                 'name': 'prueba2',
-                 'interfaces': ['Gi 1/1', 'Gi 1/2']
-             }]
-    config_vlan = {'switch': 'cisco_ios',
-                   'port': '5000',
-                   'vlans': vlans
-                   }
-    confVlan(config_vlan)
+

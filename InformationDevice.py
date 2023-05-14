@@ -9,7 +9,7 @@ from NetworkDeploment.ConfigureSwitch import connectSwitch
 def getLinkData(links_global, lab, name):
     """
     Consulta el nodo, interfaces con el que esta conectado el nodo dado
-    :param link: lista de enlace
+    :param links_global: lista de enlace
     :param lab: lboratorio de gns3
     :param name: nombre del nodo
     :return: diccionario con (interface, destinationInterface, destinationName)
@@ -40,7 +40,7 @@ def getIpInfoRouter(lab, name):
     :return: diccionario con las ip de las interfaces y sus ips
     """
     node = lab.get_node(name)
-    device = connectRouter("cisco_ios", node.console)
+    device = connectRouter("cisco_ios", node.console_host, node.console)
     config = device.send_command("show ip interface brief")
     data = {}
     for i, line in enumerate(config.split("\n")):
@@ -62,7 +62,7 @@ def getProtocolRouter(lab, name):
     :return: devuelve el procolo configurado
     """
     node = lab.get_node(name)
-    device = connectRouter("cisco_ios", node.console)
+    device = connectRouter("cisco_ios", node.console_host, node.console)
     config = device.send_command("show ip protocol")
     words = config.split("\n")[2].split()
     return (words[3] + " " + words[4]).replace('\"', '')
@@ -76,7 +76,7 @@ def getVlanSwitch(lab, name):
     :return: devuelve un dicionaro con las vlans y las intefaces que pertenece
     """
     node = lab.get_node(name)
-    device = connectSwitch("cisco_ios", node.console)
+    device = connectSwitch("cisco_ios", node.console_host, node.console)
     config = device.send_command("show vlan brief")
 
     vlans = {}

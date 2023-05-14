@@ -17,7 +17,7 @@ def openProject(server, name):
     Devuelve:
         lab: un laboratiro de gns3 abierto
     """
-    lab = Project(name=name, connector=server)
+    lab: Project = Project(name=name, connector=server)
     try:
         lab.get()
         lab.open()
@@ -38,7 +38,7 @@ def addNode(name, lab, node):
     lab.create_node(name=name, template=node)
     time.sleep(1)
     node = lab.get_node(name)
-    return node.console
+    return node.console_host, node.console
 
 
 def createLinks(lab, server, node1, node2):

@@ -1,20 +1,20 @@
 {
   "labName": "redPrueba",
   "gns3": {
-    "ipGns3Server": "10.0.49.2",
-    "portGns3Server": "80",
-    "UserGns3Server": "admin",
-    "passGns3Server": "Gns32mil23."
+    "ip": "10.0.49.10",
+    "port": "3080",
+    "user": "admin",
+    "pass": "Gns32mil23."
   },
   "nat": {
-    "router": "R1",
+    "router": "RM-1",
     "iface": "f0/1",
     "nat": "nat0"
   },
   "components": {
-    "R1": {
+    "RM-1": {
       "machineType": "router",
-      "template": "c7200",
+      "template": "Cisco 7200",
       "router": "cisco_ios",
       "interfaces": [
         {
@@ -43,9 +43,9 @@
         }
       ]
     },
-    "R2": {
+    "RE-2": {
       "machineType": "router",
-      "template": "c7200",
+      "template": "Cisco 7200 esclavo",
       "router": "cisco_ios",
       "gateway": "192.168.1.1",
       "interfaces": [
@@ -88,9 +88,9 @@
         }
       ]
     },
-    "S1": {
+    "SE-1": {
       "machineType": "switch",
-      "template": "Cisco IOSvL2 15.2(4.0.55)E",
+      "template": "Cisco IOSvL2 esclavo",
       "switch": "cisco_ios",
       "vlans": [
         {
@@ -143,21 +143,21 @@
   "connection_list": [
     [
       {
-        "name": "R1",
+        "name": "RM-1",
         "interface": "FastEthernet0/0"
       },
       {
-        "name": "R2",
+        "name": "RE-2",
         "interface": "f0/0"
       }
     ],
     [
       {
-        "name": "R2",
+        "name": "RE-2",
         "interface": "FastEthernet1/0"
       },
       {
-        "name": "S1",
+        "name": "SE-1",
         "interface": "Gi0/0"
       }
     ],
@@ -167,7 +167,7 @@
         "interface": "eth0"
       },
       {
-        "name": "S1",
+        "name": "SE-1",
         "interface": "Gi2/0"
       }
     ],
@@ -177,13 +177,13 @@
         "interface": "eth0"
       },
       {
-        "name": "S1",
+        "name": "SE-1",
         "interface": "Gi1/0"
       }
     ],
     [
       {
-        "name": "R1",
+        "name": "RM-1",
         "interface": "f1/0"
       },
       {

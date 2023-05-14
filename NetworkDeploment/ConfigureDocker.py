@@ -13,7 +13,7 @@ def connectDocker(id, ip=None, port=2376):
     :param port: puerto donde se esta escuchando, por defecto el 2376
     :return: conector al docker
     """
-    if ip != None:
+    if ip is not None:
         client = docker.DockerClient(base_url=f'tcp://{ip}:{port}', tls=False)
     else:
         client = docker.from_env()
@@ -35,7 +35,7 @@ def configIp(settings, docker_id):
 
     docker_connection = connectDocker(docker_id)
     if settings["ip"].lower() == "dhcp":
-        config_iface = "dhclient $s" % settings["iface"]
+        config_iface = "dhclient %s" % settings["iface"]
     else:
         config_iface = ["ifconfig %s up" % settings["iface"],
                         "ifconfig %s %s netmask %s" % (settings["iface"], settings["ip"], settings["netmask"]),
@@ -44,7 +44,7 @@ def configIp(settings, docker_id):
     for command in config_iface:
         docker_connection.exec_run(command)
 
-def configSyslog(docker_id, ip_opensearch, port_opensearh, lab_name, settings=[]):
+def configSyslog(docker_id, ip_opensearch, port_opensearh, lab_name, settings=None):
     """
     Configura el servicio de syslog-ng en el equipo y activa el servicio para enviar los datos a un servidor de opensearch.
     Por defecto se van a monitorizar system e internal, aunque se puede añadir mas opicones dentro de settings
@@ -59,6 +59,8 @@ def configSyslog(docker_id, ip_opensearch, port_opensearh, lab_name, settings=[]
             + log: ruta absoluta del log o fichero a monitorizar
     :return: None
     """
+    if settings is None:
+        settings = []
     syslog_route = "/etc/syslog-ng/conf.d"
     conf_file = "opensearch.conf"
 

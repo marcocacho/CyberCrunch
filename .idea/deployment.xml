@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="usuario@virtual.lab.inf.uva.es:49101 agent" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="usuario@virtual.lab.inf.uva.es:49101 password (2)" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
       <paths name="usuario@virtual.lab.inf.uva.es:49101 agent">
         <serverdata>
           <mappings>
             <mapping deploy="/tmp/pycharm_project_280" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="usuario@virtual.lab.inf.uva.es:49101 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/pycharm_project_688" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="usuario@virtual.lab.inf.uva.es:49101 password (2)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/pycharm_project_572" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
