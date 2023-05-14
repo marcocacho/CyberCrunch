@@ -45,12 +45,10 @@ def readJson(file):
             hilos[deviceName] = threading.Thread(name=deviceName, target=configureRouter,
                                                  args=(lab, deviceName, settings))
             hilos[deviceName].start()
-        """
         elif settings["machineType"] == "docker":  # creacion hilo para configurar dockers
             hilos[deviceName] = threading.Thread(name=deviceName, target=configureDocker,
                                                  args=(lab, deviceName, settings))
             hilos[deviceName].start()
-        """
     if "connection_list" in network:  # apartado de crear las conexiones entre maquinas
         hilos["connection_list"] = threading.Thread(name="connection_list", target=connectNodes,
                                                     args=(lab, gns3_server, network["connection_list"]))
@@ -128,9 +126,10 @@ def configureDocker(lab, name, settings):
     console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
     NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
     docker_id = NetworkDeploment.ConfigureGns3.getDockerId(name, lab)
+
     NetworkDeploment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
                                                "netmask": settings["netmask"], "gateway": settings["gateway"]},
-                                              docker_id)
+                                              docker_id, console_ip)
     print(f"{name} creado y configurado")
 
 

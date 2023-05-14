@@ -8,7 +8,7 @@
   },
   "nat": {
     "router": "RM-1",
-    "iface": "f0/1",
+    "iface": "f2/0",
     "nat": "nat0"
   },
   "components": {
@@ -115,25 +115,25 @@
         }
       ]
     },
-    "Alumno": {
+    "Maestro": {
       "machineType": "docker",
-      "template": "Ubuntu Docker Guest",
+      "template": "ubuntu_tfg",
       "iface": "eth0",
       "ip": "192.168.1.2",
       "netmask": "255.255.255.0",
       "gateway": "192.168.1.1"
     },
-    "D1": {
+    "E1": {
       "machineType": "docker",
-      "template": "Ubuntu Docker Guest",
+      "template": "ubuntu_tfg esclavo",
       "iface": "eth0",
       "ip": "192.168.10.2",
       "netmask": "255.255.255.0",
       "gateway": "192.168.10.1"
     },
-    "D2": {
+    "E2": {
       "machineType": "docker",
-      "template": "Ubuntu Docker Guest",
+      "template": "ubuntu_tfg esclavo",
       "iface": "eth0",
       "ip": "192.168.20.2",
       "netmask": "255.255.255.0",
@@ -163,7 +163,7 @@
     ],
     [
       {
-        "name": "D2",
+        "name": "E2",
         "interface": "eth0"
       },
       {
@@ -173,7 +173,7 @@
     ],
     [
       {
-        "name": "D1",
+        "name": "E1",
         "interface": "eth0"
       },
       {
@@ -187,7 +187,7 @@
         "interface": "f1/0"
       },
       {
-        "name": "Alumno",
+        "name": "Maestro",
         "interface": "eth0"
       }
     ]

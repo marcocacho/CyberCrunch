@@ -5,22 +5,22 @@ Libreria de funciones para configurar un docker activo
 """
 
 
-def connectDocker(id, ip=None, port=2376):
+def connectDocker(id, ip=None, port=2375):
     """
     Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
     :param id: id del docker al que se quiere conectar
     :param ip: ip del equipo donde se esta ejecutnado docker
-    :param port: puerto donde se esta escuchando, por defecto el 2376
+    :param port: puerto donde se esta escuchando, por defecto el 2375
     :return: conector al docker
     """
     if ip is not None:
-        client = docker.DockerClient(base_url=f'tcp://{ip}:{port}', tls=False)
+        client = docker.DockerClient(base_url=f'tcp://{ip}:{port}', tls=False, version="auto")
     else:
         client = docker.from_env()
     return client.containers.get(id)
 
 
-def configIp(settings, docker_id):
+def configIp(settings, docker_id, console_ip, console_port=2375):
     """
     Configura la ip de un docker a traves de telnet
     :param settings: diccionario con los datos de configuracion del docker
@@ -30,10 +30,12 @@ def configIp(settings, docker_id):
             - netmask(optional): mascara de la red
             - gateway(optional): router de salida
     :param docker_id: id del docker que se quiere configurar
+    :param console_ip: ip del nodo al que nos queremos conectar
+    :param console_port: puerto donde se esta escuchando, por defecto el 2375
     :return: None
     """
 
-    docker_connection = connectDocker(docker_id)
+    docker_connection = connectDocker(docker_id, console_ip, console_port)
     if settings["ip"].lower() == "dhcp":
         config_iface = "dhclient %s" % settings["iface"]
     else:
