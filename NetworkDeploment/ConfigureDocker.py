@@ -1,5 +1,7 @@
 import docker
-
+import tarfile
+import os
+import re
 """
 Libreria de funciones para configurar un docker activo
 """
@@ -46,34 +48,33 @@ def configIp(settings, docker_id, console_ip, console_port=2375):
     for command in config_iface:
         docker_connection.exec_run(command)
 
-def configSyslog(docker_id, ip_opensearch, port_opensearh, lab_name, settings=None):
+def configSyslog(docker_id, name, opensearch, lab_name, settings=None):
     """
     Configura el servicio de syslog-ng en el equipo y activa el servicio para enviar los datos a un servidor de opensearch.
     Por defecto se van a monitorizar system e internal, aunque se puede añadir mas opicones dentro de settings
     :param docker_id: id del docker que se quiere configurar
-    :param ip_opensearch: ip del servidor donde se encuentra opensearh
-    :param port_opensearh: puerto por el que se quieren enviar los datos
+    :param name: nombre del equipo
+    :param opensearch: diccionario con la ip y puerto para enviar los datos a opensearch
     :param lab_name: nombre del laboratorio para crear su propio indice
     :param settings: array con diccionario con los datos de configuracion del docker, se puede añadir ficheros,
         claves:
-            + nombre: nombre para el recurso a monitorizar
+            + name: nombre para el recurso a monitorizar
             + type: tipo de dato para syslog
             + log: ruta absoluta del log o fichero a monitorizar
     :return: None
     """
     if settings is None:
         settings = []
-    syslog_route = "/etc/syslog-ng/conf.d"
-    conf_file = "opensearch.conf"
+    syslog_path = "/etc/syslog-ng/conf.d"
 
     destination = f'''destination d_opensearch_http {{
     elasticsearch-http(
         index("{lab_name}")
         type("")
-        url("https://{ip_opensearch}:{port_opensearh}/_bulk")
+        url("https://{opensearch["ip"]}:{opensearch["port"]}/_bulk")
         user("admin")
-        pasword("admin")
-        template("$(format-json --scope rfc5424 --scope dot-nv-pairs --rekey .* --shift 1 --scope nv-pairs --exclude DATE @timestamp=${{ISODATE}})")
+        password("admin")
+        template("$(format-json --scope rfc5424 --scope dot-nv-pairs --rekey .* --shift 1 --scope nv-pairs --exclude DATE --key ISODATE @timestamp=${{ISODATE}} @equipo=\\"{name}\\" @hostname=${{HOST}})")
     );
 }};'''
     log = '''log {{
@@ -85,14 +86,43 @@ def configSyslog(docker_id, ip_opensearch, port_opensearh, lab_name, settings=No
                 {}({})
 }};'''
     docker_connection = connectDocker(docker_id)
-    code, result = docker_connection.exec_run(f'''mkdir -p {syslog_route}''')
-    command = f'''echo '{destination}' >> {syslog_route}/{conf_file}'''
-    print(command)
-    code, result = docker_connection.execute(command)
-    print(code)
-    print(result)
+
+    code, result = docker_connection.exec_run(f'''mkdir -p {syslog_path}''')
+    config = ""
+    config += f'''{destination}\n'''
+
     for data in settings:
-        code, result = docker_connection.exec_run(f"""echo '{source.format(data['name'], data['type'], data['log'])}' >> {syslog_route}/{conf_file}""")
-        code, result = docker_connection.exec_run(f'''echo '{log.format('s_'+data['name'])}' >> {syslog_route}/{conf_file}''')
+        if "type" in data:
+            config += f"""{source.format(data['name'], data['type'], data['log'])}"""
+        config += f"""{log.format(data['name'])}"""
+
+    conf_file = "/tmp/opensearch.conf"
+    # Crear el archivo de configuración en el sistema de archivos
+    with open(conf_file, 'w+') as config_file:
+            config_file.write(config)
+
+    tar_path = f"/tmp/syslog_{name}.tar"
+    # Crear un archivo tar con el archivo de configuración
+    with tarfile.open(tar_path, 'w') as tar:
+        tar.add(conf_file, arcname=f"syslog_{name}.conf")
+
+    # Leer el archivo tar como bytes
+    with open(tar_path, 'rb') as tar_file:
+        tar_data = tar_file.read()
 
 
+    docker_connection.put_archive(path=syslog_path, data=tar_data)
+
+    code, result =docker_connection.exec_run("""cat /etc/syslog-ng/syslog-ng.conf""")
+
+    syslog_include = '@include "/etc/syslog-ng/conf.d/*.conf"'
+    if  re.search(syslog_include, result.decode()):
+        code, result = docker_connection.exec_run(f"""echo {syslog_include} >> /etc/syslog-ng/syslog-ng.conf""")
+        print(code)
+        print(result)
+
+    docker_connection.exec_run('service syslog-ng restart')
+
+    # Eliminar los archivos temporales
+    os.remove(conf_file)
+    os.remove(tar_path)

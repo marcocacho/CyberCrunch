@@ -6,6 +6,10 @@
     "user": "admin",
     "pass": "Gns32mil23."
   },
+  "openSearch": {
+    "ip": "10.0.49.250",
+    "port": "9200"
+  },
   "nat": {
     "router": "RM-1",
     "iface": "f2/0",
@@ -121,7 +125,12 @@
       "iface": "eth0",
       "ip": "192.168.1.2",
       "netmask": "255.255.255.0",
-      "gateway": "192.168.1.1"
+      "gateway": "192.168.1.1",
+      "opensearch": [
+        {
+          "name": "s_src"
+        }
+      ]
     },
     "E1": {
       "machineType": "docker",

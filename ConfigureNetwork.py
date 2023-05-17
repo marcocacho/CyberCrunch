@@ -26,6 +26,7 @@ def readJson(file):
                                 user=gns3["user"], cred=gns3["pass"])
     lab_name = network["labName"]
     lab: Project = NetworkDeploment.ConfigureGns3.openProject(gns3_server, lab_name)
+
     if "nat" in network:  # creacion hilo para configurar el Nat
         nat = network["nat"]
         for iface in network["components"][nat["router"]]["interfaces"]:
@@ -36,6 +37,7 @@ def readJson(file):
         nat["SO"] = network["components"][nat["router"]]["router"]
         hilos["nat"] = threading.Thread(name="nat", target=configureNat,
                                         args=(lab, "NAT", nat))
+
     for deviceName, settings in network["components"].items():
         if settings["machineType"] == "switch":  # creacion hilo para configurar switch
             hilos[deviceName] = threading.Thread(name=deviceName, target=configureSwitch,
@@ -45,9 +47,9 @@ def readJson(file):
             hilos[deviceName] = threading.Thread(name=deviceName, target=configureRouter,
                                                  args=(lab, deviceName, settings))
             hilos[deviceName].start()
-        elif settings["machineType"] == "docker":  # creacion hilo para configurar dockers
+        if settings["machineType"] == "docker":  # creacion hilo para configurar dockers
             hilos[deviceName] = threading.Thread(name=deviceName, target=configureDocker,
-                                                 args=(lab, deviceName, settings))
+                                                 args=(lab, deviceName, settings, network["openSearch"]))
             hilos[deviceName].start()
     if "connection_list" in network:  # apartado de crear las conexiones entre maquinas
         hilos["connection_list"] = threading.Thread(name="connection_list", target=connectNodes,
@@ -57,10 +59,12 @@ def readJson(file):
         if not (deviceName == "connection_list" or deviceName == "nat"):
             hilos[deviceName].join()
     # añadir aqui la cracion del nat
+
     hilos["nat"].start()
     hilos["nat"].join()
     hilos["connection_list"].start()
     hilos["connection_list"].join()
+
     print(f"Red {lab_name} creada y configura")
     f.close()
 
@@ -115,12 +119,13 @@ def configureSwitch(lab, name, settings):
     print(f"{name} creado y configurado")
 
 
-def configureDocker(lab, name, settings):
+def configureDocker(lab, name, settings, opensearch):
     """
     Crea el nodo docker selecionado, lo enciende y lo configurarlo
     :param lab: laboratorio de gns3 abierto
     :param name: nombre que se le va a otorgar al nodo
     :param settings: diicionario con los datos a configurar con el formato descrito en LaboratoryFormat.txt
+    :param opensearch: diccionario con los datos de la ip y puerto del servidor opensearch
     :return: None
     """
     console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
@@ -130,6 +135,8 @@ def configureDocker(lab, name, settings):
     NetworkDeploment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
                                                "netmask": settings["netmask"], "gateway": settings["gateway"]},
                                               docker_id, console_ip)
+    if "opensearch" in settings:
+        NetworkDeploment.ConfigureDocker.configSyslog(docker_id, name, opensearch, lab.name, settings["opensearch"])
     print(f"{name} creado y configurado")
 
 
