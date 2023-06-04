@@ -11,6 +11,7 @@ def printNodeInfo(lab_name, GNS3_info, node_name):
                                 user=GNS3_info["user"], cred=GNS3_info["pass"])
     lab: Project = gns3_server.get_project(name=lab_name)
     nodo: Node = lab.get_node(name=node_name)
+    nodo.start()
     if "docker" == nodo.node_type:
         info = InformationDevice.getInfoLinux(lab, node_name)
         PrettyPrint.prettyLinuxInfo(info)
@@ -35,6 +36,7 @@ def exportLabInfo(lab_name, GNS3_info, filename):
     gns3_server = Gns3Connector(url=f"http://{GNS3_info['ip']}:{GNS3_info['port']}",
                                 user=GNS3_info["user"], cred=GNS3_info["pass"])
     lab: Project = gns3_server.get_project(name=lab_name)
+    lab.start_nodes(poll_wait_time=5)
     network = {"labName": lab_name, "gns3": GNS3_info, "components":[], "connection_list": []}
     for nodo in lab.nodes:
         if "docker" == nodo.node_type:
