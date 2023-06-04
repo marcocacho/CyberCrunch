@@ -2,7 +2,7 @@ def prettyRouterInfo(dictionary):
     """
     Imprime los datos proporcionados de un router de manera legible
     :param dictionary: diccionario con los datos de un router
-    :return: NONE
+    :return: None
     """
     # Print name and type
     print(
@@ -28,7 +28,7 @@ def prettySwitchInfo(dictionary):
     """
     Imprime los datos proporcionados de un switch de manera legible
     :param dictionary: diccionario con los datos de un router
-    :return: NONE
+    :return: None
     """
     # Print name and type
     print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nStatus: {dictionary['status']}\n")
@@ -51,7 +51,7 @@ def prettyLinuxInfo(dictionary):
     """
     Imprime los datos proporcionados de un equipo Linux de manera legible
     :param dictionary: diccionario con los datos de un router
-    :return: NONE
+    :return: None
     """
     # Print name and type
     print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nStatus: {dictionary['status']}\n")

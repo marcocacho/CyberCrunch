@@ -124,7 +124,7 @@ def getIpLinux(lab, name):
         return None
 
 
-def getInfoRouter(name, lab):
+def getInfoRouter(lab, name):
     """
     Solicta informacion considerada importante de un router
     :param name: nombre del nodo
@@ -138,7 +138,7 @@ def getInfoRouter(name, lab):
     return data
 
 
-def getInfoSwithch(name, lab):
+def getInfoSwithch(lab, name):
     """
     Solicta informacion considerada importante de un switch
     :param name: nombre del nodo
@@ -152,7 +152,7 @@ def getInfoSwithch(name, lab):
     return data
 
 
-def getInfoLinux(name, lab):
+def getInfoLinux(lab, name):
     """
     Solicta informacion considerada importante de un equipo linux
     :param name: nombre del nodo
