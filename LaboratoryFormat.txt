@@ -11,9 +11,7 @@ Para un laboratorio:
     "openSearch":{
         "ip": ip de la maquina donde se almacenan los logs
         "port": puerto de la maquina abierto
-    },
-    "logServer": ip
-    "nat": {
+    },l    "nat": {
         "router": name,
         "iface": interfaz del router reservada para el nat
         "nat": interfaz del nat
@@ -24,12 +22,11 @@ Para un laboratorio:
 Configuracion de los componentes:
     Para un router:
         "name":{ nombre del router
-            "nodo": nombre del host esclavo
             "machineType": "router",
             "template": template del router,
-            "router": tipo de SO del router,
+            "OS": tipo de SO del router,
             "gatawey": ip router salida por defecto
-            "interfaces": lista de interfaces con: {"iface": interfaz, "ip": "ip, "netmask": mascarade la red}
+            "interfaces": lista de interfaces con: {"iface": interfaz, "ip": "ip", "netmask": mascarade la red}
             "acls": lista de las acls con: { "list": numero de la lista, "action": accion,"origin": ip origen,
                     "orNetmask": mascara origen,"dest": ip destino,"destNetmask": mascara destino, "protocol": protocolo,
                         "protocol": protocolo por nombre o numero},
@@ -40,28 +37,20 @@ Configuracion de los componentes:
 
     Para un switch:
          "name":{ nombre del switch
-            "nodo": nombre del host esclavo
             "machineType": "switch",
             "template": template del switch,
-            "switch": tipo de SO del switch,
+            "OS": tipo de SO del switch,
             "vlans": lista con las vlans que se aplicacan con:{"number": numero de la vlan o trunk,
                 "interfaces": lista con las interfaces}
          }
 
     Para un docker:
         "name":{nombre del docker
-            "nodo": nombre del host esclavo
             "machineType": "docker",
             "template": template del docker,
             "docker_port": puerto en el que esta levantado el servicio docker en la maquina, opcional sino sera usado 2375
-            #falta la configuracion del docker.
+            "iface": nombre de la interfaz,
+            "ip": "ip",
+            "netmask": "mascarade la red",
+            "gateway": "ip puerta de enlace"
         }
-
-No se que representa esto a dia 13/05/2023
-"vlans": [
-      {
-        "number": "trunk",
-        "interfaces": [
-          "Gi 0/0"
-        ]
-      },

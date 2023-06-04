@@ -1,12 +1,13 @@
 import json
 import threading
 import time
+import sys
+import os
 
 from gns3fy import Gns3Connector, Project
 
 import NetworkDeploment.ConfigureDocker
 import NetworkDeploment.ConfigureGns3
-import NetworkDeploment.ConfigureMachine
 import NetworkDeploment.ConfigureRouter
 import NetworkDeploment.ConfigureSwitch
 
@@ -20,53 +21,58 @@ def readJson(file):
     """
     hilos = {}  # dicionario con los hilos creados
     f = open(file, "r")
-    network = json.load(f)
-    gns3 = network["gns3"] #10.0.49.2 ip interna de equipo
-    gns3_server = Gns3Connector(url=f"http://{gns3['ip']}:{gns3['port']}",
-                                user=gns3["user"], cred=gns3["pass"])
-    lab_name = network["labName"]
-    lab: Project = NetworkDeploment.ConfigureGns3.openProject(gns3_server, lab_name)
+    try: #validacion JSON valido
+        network = json.load(f)
+        print("Se empieza a configurar el laboratorio")
+        gns3 = network["gns3"] #10.0.49.2 ip interna de equipo
+        gns3_server = Gns3Connector(url=f"http://{gns3['ip']}:{gns3['port']}",
+                                    user=gns3["user"], cred=gns3["pass"])
+        lab_name = network["labName"]
+        lab: Project = NetworkDeploment.ConfigureGns3.openProject(gns3_server, lab_name)
 
-    if "nat" in network:  # creacion hilo para configurar el Nat
-        nat = network["nat"]
-        for iface in network["components"][nat["router"]]["interfaces"]:
-            iface["nat"] = "inside"
-        network["components"][nat["router"]]["interfaces"].append({"iface": nat["iface"], "nat": "outside"})
-        network["connection_list"].append([{"name": nat["router"], "interface": nat["iface"]},
-                                           {"name": "NAT", "interface": nat["nat"]}])
-        nat["SO"] = network["components"][nat["router"]]["router"]
-        hilos["nat"] = threading.Thread(name="nat", target=configureNat,
-                                        args=(lab, "NAT", nat))
+        if "nat" in network:  # creacion hilo para configurar el Nat
+            nat = network["nat"]
+            for iface in network["components"][nat["router"]]["interfaces"]:
+                iface["nat"] = "inside"
+            network["components"][nat["router"]]["interfaces"].append({"iface": nat["iface"], "nat": "outside"})
+            network["connection_list"].append([{"name": nat["router"], "interface": nat["iface"]},
+                                               {"name": "NAT", "interface": nat["nat"]}])
+            nat["SO"] = network["components"][nat["router"]]["OS"]
+            hilos["nat"] = threading.Thread(name="nat", target=configureNat,
+                                            args=(lab, "NAT", nat))
 
-    for deviceName, settings in network["components"].items():
-        if settings["machineType"] == "switch":  # creacion hilo para configurar switch
-            hilos[deviceName] = threading.Thread(name=deviceName, target=configureSwitch,
-                                                 args=(lab, deviceName, settings))
-            hilos[deviceName].start()
-        elif settings["machineType"] == "router":  # creacion hilo para configurar router
-            hilos[deviceName] = threading.Thread(name=deviceName, target=configureRouter,
-                                                 args=(lab, deviceName, settings))
-            hilos[deviceName].start()
-        if settings["machineType"] == "docker":  # creacion hilo para configurar dockers
-            hilos[deviceName] = threading.Thread(name=deviceName, target=configureDocker,
-                                                 args=(lab, deviceName, settings, network["openSearch"]))
-            hilos[deviceName].start()
-    if "connection_list" in network:  # apartado de crear las conexiones entre maquinas
-        hilos["connection_list"] = threading.Thread(name="connection_list", target=connectNodes,
-                                                    args=(lab, gns3_server, network["connection_list"]))
+        for deviceName, settings in network["components"].items():
+            if settings["machineType"] == "switch":  # creacion hilo para configurar switch
+                hilos[deviceName] = threading.Thread(name=deviceName, target=configureSwitch,
+                                                     args=(lab, deviceName, settings))
+                hilos[deviceName].start()
+            elif settings["machineType"] == "router":  # creacion hilo para configurar router
+                hilos[deviceName] = threading.Thread(name=deviceName, target=configureRouter,
+                                                     args=(lab, deviceName, settings))
+                hilos[deviceName].start()
+            if settings["machineType"] == "docker":  # creacion hilo para configurar dockers
+                hilos[deviceName] = threading.Thread(name=deviceName, target=configureDocker,
+                                                     args=(lab, deviceName, settings, network["openSearch"]))
+                hilos[deviceName].start()
+        if "connection_list" in network:  # apartado de crear las conexiones entre maquinas
+            hilos["connection_list"] = threading.Thread(name="connection_list", target=connectNodes,
+                                                        args=(lab, gns3_server, network["connection_list"]))
 
-    for deviceName in hilos:
-        if not (deviceName == "connection_list" or deviceName == "nat"):
-            hilos[deviceName].join()
-    # añadir aqui la cracion del nat
+        for deviceName in hilos:
+            if not (deviceName == "connection_list" or deviceName == "nat"):
+                hilos[deviceName].join()
+        # añadir aqui la cracion del nat
 
-    hilos["nat"].start()
-    hilos["nat"].join()
-    hilos["connection_list"].start()
-    hilos["connection_list"].join()
+        hilos["nat"].start()
+        hilos["nat"].join()
+        hilos["connection_list"].start()
+        hilos["connection_list"].join()
 
-    print(f"Red {lab_name} creada y configura")
-    f.close()
+        print(f"Red {lab_name} creada y configura")
+    except json.JSONDecodeError:
+        print("Invalid JSON format. Please provide a valid JSON file.")
+    finally:
+        f.close()
 
 
 def configureRouter(lab, name, settings):
@@ -81,7 +87,7 @@ def configureRouter(lab, name, settings):
     NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
     time.sleep(30)  # tiempo de esperado para que se encienda el equipo
     if "interfaces" in settings:
-        config_ip = {"router": settings["router"], "console_ip": console_ip, "console_port": console_port, "interfaces": settings["interfaces"]}
+        config_ip = {"router": settings["OS"], "console_ip": console_ip, "console_port": console_port, "interfaces": settings["interfaces"]}
         NetworkDeploment.ConfigureRouter.confIp(config_ip)
     if "routes" in settings:
         config_route = {"router": settings["router"], "console_ip": console_ip, "console_port": console_port, "type": settings["type"],
@@ -98,7 +104,7 @@ def configureRouter(lab, name, settings):
 
     NetworkDeploment.ConfigureRouter.saveConfiguration(settings["router"], console_ip, console_port)
 
-    print(f"{name} creado y configurado")
+    print(f"Configured: {name}")
 
 
 def configureSwitch(lab, name, settings):
@@ -113,10 +119,10 @@ def configureSwitch(lab, name, settings):
     NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
     time.sleep(60)  # tiempo de esperado para que se encienda el equipo
     if "vlans" in settings:
-        config_vlan = {"switch": settings["switch"], "console_ip": console_ip, "console_port": console_port, "vlans": settings["vlans"]}
+        config_vlan = {"switch": settings["OS"], "console_ip": console_ip, "console_port": console_port, "vlans": settings["vlans"]}
         NetworkDeploment.ConfigureSwitch.confVlan(config_vlan)
     NetworkDeploment.ConfigureRouter.saveConfiguration(settings["switch"], console_ip, console_port)
-    print(f"{name} creado y configurado")
+    print(f"Configured: {name}")
 
 
 def configureDocker(lab, name, settings, opensearch):
@@ -129,16 +135,22 @@ def configureDocker(lab, name, settings, opensearch):
     :return: None
     """
     console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, settings["template"])
-    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
+    #se llamara a la funcion para cambiar el nombre del docker y añadir los templates.
     docker_id = NetworkDeploment.ConfigureGns3.getDockerId(name, lab)
+
+    #Actualizamos el docker
+    if "logs_route" in settings:
+        NetworkDeploment.ConfigureDocker.updateDocker(docker_id, name, lab.name, logs_docker=settings["logs_route"],
+                                                      console_ip=console_ip)
+    else:
+        NetworkDeploment.ConfigureDocker.updateDocker(docker_id, name, lab.name, console_ip=console_ip)
+
+    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
+
 
     NetworkDeploment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
                                                "netmask": settings["netmask"], "gateway": settings["gateway"]},
                                               docker_id, console_ip)
-    if "opensearch" in settings:
-        NetworkDeploment.ConfigureDocker.configSyslog(docker_id, name, opensearch, lab.name, settings["opensearch"])
-    print(f"{name} creado y configurado")
-
 
 def connectNodes(lab, server, conection_list):
     """
@@ -168,8 +180,15 @@ def configureNat(lab, name, settings):
     # no necesario poner ip domain-server 8.8.8.8 y ip domain-lookup
     NetworkDeploment.ConfigureRouter.saveConfiguration(settings["SO"], console_ip, console_port)
 
-    print(f"{name} creado y configurado")
+    print(f"Configured: {name}")
 
 
 if __name__ == "__main__":
-    readJson("redPrueba.json")
+    if len(sys.argv) != 2:
+        print("Invalid number of arguments provided. Please provide a valid path to a JSON file.")
+    else:
+        filename = sys.argv[1]
+        if not os.path.isfile(filename):
+            print("Invalid file. Please provide a valid path to a JSON file.")
+        else:
+            readJson(filename)

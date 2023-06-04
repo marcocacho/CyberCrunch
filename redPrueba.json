@@ -1,5 +1,5 @@
 {
-  "labName": "redPrueba",
+  "labName": "red_Prueba",
   "gns3": {
     "ip": "10.0.49.10",
     "port": "3080",
@@ -19,7 +19,7 @@
     "RM-1": {
       "machineType": "router",
       "template": "Cisco 7200",
-      "router": "cisco_ios",
+      "OS": "cisco_ios",
       "interfaces": [
         {
           "iface": "fa0/0",
@@ -33,7 +33,7 @@
           "nat": "inside"
         }
       ],
-      "type": "ospf",
+      "pathingType": "ospf",
       "routes": [
         {
           "ip": "192.168.1.0",
@@ -50,7 +50,7 @@
     "RE-2": {
       "machineType": "router",
       "template": "Cisco 7200 esclavo",
-      "router": "cisco_ios",
+      "OS": "cisco_ios",
       "gateway": "192.168.1.1",
       "interfaces": [
         {
@@ -95,7 +95,7 @@
     "SE-1": {
       "machineType": "switch",
       "template": "Cisco IOSvL2 esclavo",
-      "switch": "cisco_ios",
+      "OS": "cisco_ios",
       "vlans": [
         {
           "number": "trunk",
@@ -125,12 +125,7 @@
       "iface": "eth0",
       "ip": "192.168.1.2",
       "netmask": "255.255.255.0",
-      "gateway": "192.168.1.1",
-      "opensearch": [
-        {
-          "name": "s_src"
-        }
-      ]
+      "gateway": "192.168.1.1"
     },
     "E1": {
       "machineType": "docker",

@@ -30,7 +30,7 @@ claves que no son necesarios para este modo.
             )
             connected = True
         except Exception as e:
-            print("Error de conexión:", str(e))
+            print(f"Error de conexión:", str(e))
             print("Reintentando la conexión en 5 segundos...")
             time.sleep(5)
 

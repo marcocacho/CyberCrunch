@@ -2,25 +2,28 @@ import docker
 import tarfile
 import os
 import re
+
 """
-Libreria de funciones para configurar un docker activo
+Libreria de funciones para configurar un docker 
 """
 
 
-def connectDocker(id, ip=None, port=2375):
+def connectDocker(id=None, ip=None, port=2375):
     """
-    Se conecta a un router a traves de telnet desplegado en gns3 instalado en la maquina local.
+    Se conecta a una isntancia de un docker o un docker levantado
     :param id: id del docker al que se quiere conectar
     :param ip: ip del equipo donde se esta ejecutnado docker
     :param port: puerto donde se esta escuchando, por defecto el 2375
-    :return: conector al docker
+    :return: conector a la instancia o al docker creado
     """
     if ip is not None:
         client = docker.DockerClient(base_url=f'tcp://{ip}:{port}', tls=False, version="auto")
     else:
         client = docker.from_env()
-    return client.containers.get(id)
-
+    if id is not None:
+        return client.containers.get(id)
+    else:
+        return client
 
 def configIp(settings, docker_id, console_ip, console_port=2375):
     """
@@ -47,6 +50,33 @@ def configIp(settings, docker_id, console_ip, console_port=2375):
 
     for command in config_iface:
         docker_connection.exec_run(command)
+
+def updateDocker(docker_id, name, lab_name, logs_docker=None, console_ip=None, console_port=2375):
+    """
+    Actualiza la inforamcion del docker que ha creado GNS3
+    :param docker_id: id del docker que se quiere actualizar
+    :param name: nombre del equipo
+    :param lab_name: nombre del laboratorio para crear su propio indice
+    :param logs_docker: lista de rutas donde se encuentran los logs de router, hasta la carpeta no los archivos .log
+    :param console_ip: ip del nodo al que nos queremos conectar
+    :param console_port: puerto donde se esta escuchando, por defecto el 2375
+    :return: None
+    """
+    if logs_docker is None:
+        logs_docker = []
+    else:
+        path = "/var/log/docker/"+lab_name+"/"+name
+        os.makedirs(path)
+    docker_connection = connectDocker(docker_id, console_ip, console_port)
+
+    #Cambiamos el nombre del contenedor
+    if not lab_name + '-' + name == docker_connection.name:
+        docker_connection.rename(lab_name+'-'+name)
+
+    #añado labels para los logs del docker
+    #docker_connection.update(labels={'laboratory': lab_name, 'host_name': name})
+
+    docker_connection.reload()
 
 def configSyslog(docker_id, name, opensearch, lab_name, settings=None):
     """
@@ -121,7 +151,11 @@ def configSyslog(docker_id, name, opensearch, lab_name, settings=None):
         print(code)
         print(result)
 
-    docker_connection.exec_run('service syslog-ng restart')
+    docker_connection.exec_run('service syslog-ng enable')
+    code, result = docker_connection.exec_run('service syslog-ng restart')
+    print(docker_id)
+    print(code)
+    print(result.decode())
 
     # Eliminar los archivos temporales
     os.remove(conf_file)
