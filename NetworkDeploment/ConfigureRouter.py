@@ -29,8 +29,8 @@ claves que no son necesarios para este modo.
             )
             connected = True
         except Exception as e:
-            print("Error de conexión:", str(e))
-            print("Reintentando la conexión en 5 segundos...")
+            print("Connection error:", str(e))
+            print("Retrying connection in 5 seconds...")
             time.sleep(5)
     return device
 
@@ -98,20 +98,20 @@ def confRoute(settings):
     device = connectRouter(settings['router'], settings['console_ip'], settings['console_port'])
 
     config_route = []
-    if settings['type'] == 'static':  # si el tipo de enrutamiento es estatico.
+    if settings['pathingType'] == 'static':  # si el tipo de enrutamiento es estatico.
         for route in settings['routes']:
             config_route.append('ip route %s %s %s' % (route['origin'], route['orNetmask'], route['dest']))
-    elif settings['type'] == 'rip':  # para el tipo de enrutamiento dinamico con rip
+    elif settings['pathingType'] == 'rip':  # para el tipo de enrutamiento dinamico con rip
         version = settings['routes']['version']
         networks = settings['routes']['networks']
         config_route.append('router rip')
         config_route.append('version %s' % version)
         for net in networks:
             config_route.append('network %s' % net)
-    elif settings['type'] == 'ospf':  # para el tipo de enrutamiento dinamico con ospf
+    elif settings['pathingType'] == 'ospf':  # para el tipo de enrutamiento dinamico con ospf
         config_route.append("router ospf 1")
         for area in settings['routes']:
-            config_route.append("network %s %s area %s" % (area["ip"], area["wilcard"], area["area"]))
+            config_route.append("network %s %s area %s" % (area["ip"], area["wildcard"], area["area"]))
     output = device.send_config_set(config_route)
     device.disconnect()
 

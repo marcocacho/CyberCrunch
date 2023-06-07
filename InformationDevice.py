@@ -41,17 +41,14 @@ def getIpInfoRouter(lab, name):
     """
     node = lab.get_node(name)
     device = connectRouter("cisco_ios", node.console_host, node.console)
-    config = device.send_command("show ip interface brief")
-    data = {}
-    for i, line in enumerate(config.split("\n")):
-        if i == 0:
-            continue
-        else:
-            word = line.split()
-            k, v = word[:2]
-            if v != 'unassigned':
-                data[k] = v
-    return data
+    config = device.send_command("show run | inc interface | ip address")
+    interfaces = []
+    pattern = r"interface\s+(\S+)\s+ip address\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
+    matches = re.findall(pattern, config)
+    for match in matches:
+        interfaces.append({"iface": match[0], "ip": match[1], "netmask": match[2]})
+
+    return interfaces
 
 
 def getProtocolRouter(lab, name):
@@ -64,8 +61,19 @@ def getProtocolRouter(lab, name):
     node = lab.get_node(name)
     device = connectRouter("cisco_ios", node.console_host, node.console)
     config = device.send_command("show ip protocol")
+    #Añadir la deteccion de areas y ips
     words = config.split("\n")[2].split()
-    return (words[3] + " " + words[4]).replace('\"', '')
+
+    pathingType = (words[3]).replace('\"', '')
+    routes = []
+    if pathingType.lower() == "ospf":
+        pattern = r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s)+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+area\s+(\d+)"
+        # Find all matches in the OSPF output
+        matches = re.findall(pattern, config)
+        for ip, wildcard, area in matches:
+            routes.append({"ip": ip, "wildcard": wildcard, "area": area})
+
+    return pathingType, routes
 
 
 def getVlanSwitch(lab, name):
@@ -80,24 +88,26 @@ def getVlanSwitch(lab, name):
     config = device.send_command("show vlan brief")
 
     vlans = {}
+    vlans_names = {}
     for line in config.split("\n")[2:]:
         match = re.match(r'^s*(\d+)\s+(\S+(?: \d+)?)\s+(\S+)\s(.+)$', line)
         if match:
             vlan_id = match.group(1)
             interfaces = (match.group(4).replace(',', '').split())
             vlans[vlan_id] = interfaces
+            vlans_names[vlan_id] = match.group(2)
 
-    return vlans
+    return vlans, vlans_names
 
 
-def getGatewayLinux(lab, name):
+def getGatewayLinux(lab, name, console_ip, console_port=2375):
     """
     Consulta la Ip del gateway de un dispositivo linux
     :param lab: lboratorio de gns3
     :param name: nombre del nodo
     :return: Ip del gateway
     """
-    docker_connection = connectDocker(getDockerId(name, lab))
+    docker_connection = connectDocker(getDockerId(name, lab), console_ip, console_port)
     result = docker_connection.exec_run("route")
     config = result.output.decode("utf-8")
     gateway_match = re.search(r"^default\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config, re.MULTILINE)
@@ -107,14 +117,14 @@ def getGatewayLinux(lab, name):
         return None
 
 
-def getIpLinux(lab, name):
+def getIpLinux(lab, name, console_ip, console_port=2375):
     """
     Consulta la Ip  de un equipo linux
     :param lab: lboratorio de gns3
     :param name: nombre del nodo
     :return: Ip del equipo
     """
-    docker_connection = connectDocker(getDockerId(name, lab))
+    docker_connection = connectDocker(getDockerId(name, lab), console_ip, console_port)
     result = docker_connection.exec_run("ifconfig eth0")
     config = result.output.decode("utf-8")
     gateway_match = re.search(r"^\s+inet\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config, re.MULTILINE)
@@ -123,6 +133,21 @@ def getIpLinux(lab, name):
     else:
         return None
 
+def getNetmaskLinux(lab, name, console_ip, console_port=2375):
+    """
+    Consulta la mascasra  de un equipo linux
+    :param lab: lboratorio de gns3
+    :param name: nombre del nodo
+    :return: Ip del equipo
+    """
+    docker_connection = connectDocker(getDockerId(name, lab), console_ip, console_port)
+    result = docker_connection.exec_run("ifconfig eth0")
+    config = result.output.decode("utf-8")
+    gateway_match = re.search(r"netmask\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", config, re.MULTILINE)
+    if gateway_match:
+        return gateway_match.group(1)
+    else:
+        return None
 
 def getInfoRouter(lab, name):
     """
@@ -131,9 +156,11 @@ def getInfoRouter(lab, name):
     :param lab: laboratorio de gns3
     :return: diccionario con los datos
     """
+
     node = lab.get_node(name)
-    data = {"name": name, "type": "router", "links": getLinkData(lab.links, lab, name),
-            "ip": getIpInfoRouter(lab, name), "protocol": getProtocolRouter(lab, name), "status": node.status}
+    protocol, routes = getProtocolRouter(lab, name)
+    data = {"name": name, "machineType": "router", "links": getLinkData(lab.links, lab, name),
+            "interfaces": getIpInfoRouter(lab, name), "pathingType": protocol, "routes": routes, "status": node.status}
 
     return data
 
@@ -146,8 +173,9 @@ def getInfoSwithch(lab, name):
     :return: diccionario con los datos
     """
     node = lab.get_node(name)
-    data = {"name": name, "type": "Switch", "links": getLinkData(lab.links, lab, name),
-            "vlans": getVlanSwitch(lab, name), "status": node.status}
+    vlans, vlans_names = getVlanSwitch(lab, name)
+    data = {"name": name, "machineType": "Switch", "links": getLinkData(lab.links, lab, name),
+            "vlans": vlans, "vlans_names": vlans_names, "status": node.status}
 
     return data
 
@@ -160,7 +188,12 @@ def getInfoLinux(lab, name):
     :return: diccionario con los datos
     """
     node = lab.get_node(name)
-    data = {"name": name, "type": "Linux", "links": getLinkData(lab.links, lab, name),
-            "ip": getIpLinux(lab, name), "gateway": getGatewayLinux(lab, name), "status": node.status}
+    data = {"name": name, "links": getLinkData(lab.links, lab, name), "iface": "eth0",
+            "ip": getIpLinux(lab, name, node.console_host), "gateway": getGatewayLinux(lab, name, node.console_host),
+            "netmask": getNetmaskLinux(lab, name, node.console_host), "status": node.status}
 
     return data
+
+def getNatInfo(lab, name):
+    link = getLinkData(lab.links, lab, name)
+    return {"router": link [0]["destinationName"], "iface": link[0]["destinationInterface"], "nat":  link[0]["interface"]}

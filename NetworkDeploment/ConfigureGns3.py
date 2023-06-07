@@ -23,16 +23,18 @@ def openProject(server, name):
         lab.open()
     except:
         lab.create()
+        lab.update(auto_close=False)
 
     return lab
 
 
-def addNode(name, lab, template):
+def addNode(name, lab, template=None, template_id=None):
     """
     Añade un nuevo nodo al proyecto GNS3 con el nombre indicado y lo levanta
     :param name: nombre que se le va a otorgar al nodo
     :param lab: laboratorio de gns3 abierto
     :param template: template selecionado de los disponibles
+    :param template_id: id del template selecionado
     :return: puerto donde se abrio la consola
     """
     exist = False
@@ -43,7 +45,10 @@ def addNode(name, lab, template):
             break
 
     if not exist:
-        lab.create_node(name=name, template=template)
+        if template_id == None:
+            lab.create_node(name=name, template=template)
+        elif template == None:
+            lab.create_node(name=name, template_id=template_id)
         time.sleep(1)
     node = lab.get_node(name)
     return node.console_host, node.console

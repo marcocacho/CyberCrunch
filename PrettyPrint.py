@@ -6,7 +6,7 @@ def prettyRouterInfo(dictionary):
     """
     # Print name and type
     print(
-        f"Name: {dictionary['name']}\nType: {dictionary['type']}\nProtocol: {dictionary['protocol']}\nStatus: {dictionary['status']}\n")
+        f"Name: {dictionary['name']}\nType: {dictionary['machineType']}\nStatus: {dictionary['status']}\n")
 
     # Print links in a subtable
     links = dictionary['links']
@@ -17,12 +17,17 @@ def prettyRouterInfo(dictionary):
     print()
 
     # Print ip in a subtable
-    interfaces = dictionary['ip']
     print("Interfaces:")
-    print("{:<20} {:<20}".format("Interface", "Ip"))
-    for interface in interfaces:
-        print("{:<20} {:<20} ".format(interface, interfaces[interface]))
+    print("{:<20} {:<20} {:<20}".format("Interface", "Ip", "Netmask"))
+    for iface in dictionary["interfaces"]:
+        print("{:<20} {:<20} {:<20}".format(iface["iface"],iface["ip"], iface["netmask"]))
+    print()
 
+    print(f"Pathing: {dictionary['pathingType']}")
+    print("Routes:")
+    print("{:<20} {:<20} {:<20}".format("Area", "Ip", "Wildcard"))
+    for route in dictionary["routes"]:
+        print("{:<20} {:<20} {:<20}".format(route["area"], route["ip"], route["wildcard"]))
 
 def prettySwitchInfo(dictionary):
     """
@@ -31,19 +36,20 @@ def prettySwitchInfo(dictionary):
     :return: None
     """
     # Print name and type
-    print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nStatus: {dictionary['status']}\n")
+    print(f"Name: {dictionary['name']}\nType: {dictionary['machineType']}\nStatus: {dictionary['status']}\n")
 
     # Print links in a subtable
-    links = dictionary['links']
     print("Links:")
-    print("{:<20} {:<20} {:<20} {:<20}".format("Interface", "Vlan", "Destination Name", "Destination Interface"))
-    for link in links:
-        vlan_name = "Trunk"
+    print("{:<20} {:<20} {:<20} {:<20} {:<20}".format("Interface", "Vlan", "Vlan Name", "Destination Name", "Destination Interface"))
+    for link in dictionary['links']:
+        vlan_number = "Trunk"
+        vlan_name = "N/A"
         for vlan in dictionary['vlans']:
             if link['interface'] in dictionary['vlans'][vlan]:
-                vlan_name = vlan
+                vlan_number = vlan
+                vlan_name = dictionary["vlans_names"][vlan]
                 break
-        print("{:<20} {:<20} {:<20} {:<20}".format(link['interface'], vlan_name, link['destinationName'],
+        print("{:<20} {:<20} {:<20} {:<20} {:<20}".format(link['interface'], vlan_number, vlan_name, link['destinationName'],
                                                    link['destinationInterface']))
 
 
@@ -54,8 +60,8 @@ def prettyLinuxInfo(dictionary):
     :return: None
     """
     # Print name and type
-    print(f"Name: {dictionary['name']}\nType: {dictionary['type']}\nStatus: {dictionary['status']}\n")
-    print(f"Ip: {dictionary['ip']}\tGateway:{dictionary['gateway']}\n")
+    print(f"Name: {dictionary['name']}\nType: {dictionary['machineType']}\nStatus: {dictionary['status']}\n")
+    print(f"Ip: {dictionary['ip']}\tNetmask:{dictionary['netmask']}\tGateway: {dictionary['gateway']}\n")
 
     links = dictionary['links']
     print("Links:")

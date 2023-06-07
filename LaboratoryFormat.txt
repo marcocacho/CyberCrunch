@@ -11,7 +11,8 @@ Para un laboratorio:
     "openSearch":{
         "ip": ip de la maquina donde se almacenan los logs
         "port": puerto de la maquina abierto
-    },l    "nat": {
+    },
+    "nat": {
         "router": name,
         "iface": interfaz del router reservada para el nat
         "nat": interfaz del nat
