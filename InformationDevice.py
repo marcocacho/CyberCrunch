@@ -1,9 +1,9 @@
 import re
 
-from NetworkDeploment.ConfigureDocker import connectDocker
-from NetworkDeploment.ConfigureGns3 import getDockerId
-from NetworkDeploment.ConfigureRouter import connectRouter
-from NetworkDeploment.ConfigureSwitch import connectSwitch
+from NetworkDeployment.ConfigureDocker import connectDocker
+from NetworkDeployment.ConfigureGns3 import getDockerId
+from NetworkDeployment.ConfigureRouter import connectRouter
+from NetworkDeployment.ConfigureSwitch import connectSwitch
 
 
 def getLinkData(links_global, lab, name):

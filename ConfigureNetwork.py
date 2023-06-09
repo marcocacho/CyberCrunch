@@ -6,10 +6,10 @@ import os
 
 from gns3fy import Gns3Connector, Project
 
-import NetworkDeploment.ConfigureDocker
-import NetworkDeploment.ConfigureGns3
-import NetworkDeploment.ConfigureRouter
-import NetworkDeploment.ConfigureSwitch
+import NetworkDeployment.ConfigureDocker
+import NetworkDeployment.ConfigureGns3
+import NetworkDeployment.ConfigureRouter
+import NetworkDeployment.ConfigureSwitch
 
 
 def readJson(file):
@@ -28,7 +28,7 @@ def readJson(file):
         gns3_server = Gns3Connector(url=f"http://{gns3['ip']}:{gns3['port']}",
                                     user=gns3["user"], cred=gns3["pass"])
         lab_name = network["labName"]
-        lab: Project = NetworkDeploment.ConfigureGns3.openProject(gns3_server, lab_name)
+        lab: Project = NetworkDeployment.ConfigureGns3.openProject(gns3_server, lab_name)
 
         if "nat" in network:  # creacion hilo para configurar el Nat
             nat = network["nat"]
@@ -84,29 +84,29 @@ def configureRouter(lab, name, settings):
     :return: None
     """
     if "template" in settings:
-        console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, template=settings["template"])
+        console_ip, console_port = NetworkDeployment.ConfigureGns3.addNode(name, lab, template=settings["template"])
     elif "template_id" in settings:
-        console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, template_id=settings["template_id"])
+        console_ip, console_port = NetworkDeployment.ConfigureGns3.addNode(name, lab, template_id=settings["template_id"])
 
-    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
+    NetworkDeployment.ConfigureGns3.manageMachines(name, lab, "start")
     time.sleep(30)  # tiempo de esperado para que se encienda el equipo
     if "interfaces" in settings:
         config_ip = {"router": settings["OS"], "console_ip": console_ip, "console_port": console_port, "interfaces": settings["interfaces"]}
-        NetworkDeploment.ConfigureRouter.confIp(config_ip)
+        NetworkDeployment.ConfigureRouter.confIp(config_ip)
     if "routes" in settings:
         config_route = {"router": settings["OS"], "console_ip": console_ip, "console_port": console_port, "pathingType": settings["pathingType"],
                         "routes": settings["routes"]}
-        NetworkDeploment.ConfigureRouter.confRoute(config_route)
+        NetworkDeployment.ConfigureRouter.confRoute(config_route)
     if "acls" in settings:
         config_acl = {"router": settings["OS"], "console_ip": console_ip, "console_port": console_port, "acls": settings["acls"],
                       "interfaces_acl": settings["interfaces_acl"]}
-        NetworkDeploment.ConfigureRouter.confAcl(config_acl)
+        NetworkDeployment.ConfigureRouter.confAcl(config_acl)
     if "gateway" in settings:
         config_default_route = {"router": settings["OS"], "console_ip": console_ip, "console_port": console_port, "pathingType": "static",
                                 "routes": [{"origin": "0.0.0.0", "orNetmask": "0.0.0.0", "dest": settings["gateway"]}]}
-        NetworkDeploment.ConfigureRouter.confRoute(config_default_route)
+        NetworkDeployment.ConfigureRouter.confRoute(config_default_route)
 
-    NetworkDeploment.ConfigureRouter.saveConfiguration(settings["OS"], console_ip, console_port)
+    NetworkDeployment.ConfigureRouter.saveConfiguration(settings["OS"], console_ip, console_port)
 
     print(f"Configured: {name}")
 
@@ -120,15 +120,15 @@ def configureSwitch(lab, name, settings):
     :return: None
     """
     if "template" in settings:
-        console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, template=settings["template"])
+        console_ip, console_port = NetworkDeployment.ConfigureGns3.addNode(name, lab, template=settings["template"])
     elif "template_id" in settings:
-        console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, template_id=settings["template_id"])
-    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
+        console_ip, console_port = NetworkDeployment.ConfigureGns3.addNode(name, lab, template_id=settings["template_id"])
+    NetworkDeployment.ConfigureGns3.manageMachines(name, lab, "start")
     time.sleep(60)  # tiempo de esperado para que se encienda el equipo
     if "vlans" in settings:
         config_vlan = {"switch": settings["OS"], "console_ip": console_ip, "console_port": console_port, "vlans": settings["vlans"]}
-        NetworkDeploment.ConfigureSwitch.confVlan(config_vlan)
-    NetworkDeploment.ConfigureRouter.saveConfiguration(settings["OS"], console_ip, console_port)
+        NetworkDeployment.ConfigureSwitch.confVlan(config_vlan)
+    NetworkDeployment.ConfigureRouter.saveConfiguration(settings["OS"], console_ip, console_port)
     print(f"Configured: {name}")
 
 
@@ -142,25 +142,25 @@ def configureDocker(lab, name, settings):
     :return: None
     """
     if "template" in settings:
-        console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, template=settings["template"])
+        console_ip, console_port = NetworkDeployment.ConfigureGns3.addNode(name, lab, template=settings["template"])
     elif "template_id" in settings:
-        console_ip, console_port = NetworkDeploment.ConfigureGns3.addNode(name, lab, template_id=settings["template_id"])
+        console_ip, console_port = NetworkDeployment.ConfigureGns3.addNode(name, lab, template_id=settings["template_id"])
     #se llamara a la funcion para cambiar el nombre del docker y añadir los templates.
-    docker_id = NetworkDeploment.ConfigureGns3.getDockerId(name, lab)
+    docker_id = NetworkDeployment.ConfigureGns3.getDockerId(name, lab)
 
     #Actualizamos el docker
     if "logs_route" in settings:
-        NetworkDeploment.ConfigureDocker.updateDocker(docker_id, name, lab.name, logs_docker=settings["logs_route"],
-                                                      console_ip=console_ip)
+        NetworkDeployment.ConfigureDocker.updateDocker(docker_id, name, lab.name, logs_docker=settings["logs_route"],
+                                                       console_ip=console_ip)
     else:
-        NetworkDeploment.ConfigureDocker.updateDocker(docker_id, name, lab.name, console_ip=console_ip)
+        NetworkDeployment.ConfigureDocker.updateDocker(docker_id, name, lab.name, console_ip=console_ip)
 
-    NetworkDeploment.ConfigureGns3.manageMachines(name, lab, "start")
+    NetworkDeployment.ConfigureGns3.manageMachines(name, lab, "start")
 
 
-    NetworkDeploment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
+    NetworkDeployment.ConfigureDocker.configIp({"iface": settings["iface"], "ip": settings["ip"],
                                                "netmask": settings["netmask"], "gateway": settings["gateway"]},
-                                              docker_id, console_ip)
+                                               docker_id, console_ip)
     print(f"Configured: {name}")
 
 def connectNodes(lab, server, conection_list):
@@ -172,7 +172,7 @@ def connectNodes(lab, server, conection_list):
     :return: None
     """
     for nodos in conection_list:
-        NetworkDeploment.ConfigureGns3.createLinks(lab, server, nodos[0], nodos[1])
+        NetworkDeployment.ConfigureGns3.createLinks(lab, server, nodos[0], nodos[1])
     print("Nodos conected")
 
 
@@ -184,12 +184,12 @@ def configureNat(lab, name, settings):
     :param settings: diicionario con los datos a configurar con el formato descrito en LaboratoryFormat.txt
     :return: None
     """
-    NetworkDeploment.ConfigureGns3.addNode(name, lab, "NAT")
+    NetworkDeployment.ConfigureGns3.addNode(name, lab, "NAT")
     console_ip = lab.get_node(settings["router"]).console_host
     console_port = lab.get_node(settings["router"]).console
-    NetworkDeploment.ConfigureRouter.confNateo(settings["OS"], console_ip, console_port, settings["iface"])
+    NetworkDeployment.ConfigureRouter.confNateo(settings["OS"], console_ip, console_port, settings["iface"])
     # no necesario poner ip domain-server 8.8.8.8 y ip domain-lookup
-    NetworkDeploment.ConfigureRouter.saveConfiguration(settings["OS"], console_ip, console_port)
+    NetworkDeployment.ConfigureRouter.saveConfiguration(settings["OS"], console_ip, console_port)
 
     print(f"Configured: {name}")
 
