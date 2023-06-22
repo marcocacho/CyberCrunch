@@ -17,7 +17,7 @@ Principales características:
 
 ## Instrucciones de uso
 
-Puedes encontrar en el archivho `LaboratoryFormat.txt` una explicacion de como crear el json, tambien puedes usar el `redPrueba.json` para crear una red de ejemplo
+Puedes encontrar en el archivho `LaboratoryFormat.txt` una explicacion de como crear el json, tambien puedes usar el archivo `redPrueba.json` para crear una red de ejemplo
 
 Para utilizar CyberCrunch, se proporcionan los siguientes comandos en Python 3:
 
